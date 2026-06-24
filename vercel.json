@@ -1,0 +1,14 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["icn1"],
+  "crons": [
+    {
+      "path": "/api/ingest/social-posts",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/ingest/social-sources",
+      "schedule": "0 4,11 * * *"
+    }
+  ]
+}
