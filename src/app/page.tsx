@@ -214,11 +214,11 @@ function PostAttachments({
         </div>
       ) : null}
 
-      {safeLinks.map((link) => (
+      {safeLinks.map((link, index) => (
         <a
           className="moong-link-card"
           href={link.expandedUrl}
-          key={link.expandedUrl}
+          key={`${link.expandedUrl}-${index}`}
           rel="noopener noreferrer"
           target="_blank"
         >
