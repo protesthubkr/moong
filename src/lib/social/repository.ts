@@ -924,6 +924,8 @@ type SocialPostRow = {
   post_type: string;
   posted_at: string | null;
   promoted_at: string | null;
+  quote_context?: unknown;
+  quoted_platform_post_id?: string | null;
   source_url: string;
   text_snapshot: string;
 };
@@ -943,6 +945,8 @@ function mapPublicPostRow(row: SocialPostRow): PublicMoongPost {
     postType: row.post_type,
     postedAt: row.posted_at,
     promotedAt: row.promoted_at,
+    quotedPlatformPostId: row.quoted_platform_post_id ?? null,
+    quoteContext: isObject(row.quote_context) ? row.quote_context : null,
     sourceUrl: row.source_url,
     text: row.text_snapshot,
   };

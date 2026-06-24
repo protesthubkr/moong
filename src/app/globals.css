@@ -98,6 +98,20 @@ select {
   display: block;
 }
 
+.moong-quote-group,
+.moong-quote-posts {
+  display: flex;
+  flex-direction: column;
+}
+
+.moong-quote-group {
+  gap: 10px;
+}
+
+.moong-quote-posts {
+  gap: 14px;
+}
+
 .moong-row {
   align-items: flex-start;
   display: grid;
@@ -188,8 +202,6 @@ select {
   color: #184536;
   display: block;
   margin-bottom: 10px;
-  max-height: 108px;
-  overflow: hidden;
   padding: 9px 10px;
 }
 
@@ -202,11 +214,11 @@ select {
 }
 
 .moong-parent-text {
-  display: -webkit-box;
+  display: block;
   font-size: 13px;
   line-height: 1.5;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .moong-text {
@@ -311,6 +323,57 @@ select {
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+.moong-original-card {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.54);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 7px;
+  color: var(--ink-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-left: 118px;
+  max-width: min(calc(100% - 118px), 580px);
+  padding: 11px 12px;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
+  width: 100%;
+}
+
+.moong-original-card:hover {
+  background: rgba(255, 255, 255, 0.78);
+  border-color: rgba(15, 139, 103, 0.42);
+}
+
+.moong-original-label {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 760;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.moong-original-author {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 720;
+  line-height: 1.35;
+}
+
+.moong-original-text {
+  display: block;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.moong-original-text--empty {
+  color: var(--muted);
 }
 
 .moong-time {
@@ -607,6 +670,11 @@ select {
   .moong-bubble,
   .moong-attachments {
     max-width: 100%;
+  }
+
+  .moong-original-card {
+    margin-left: 43px;
+    max-width: calc(100% - 43px);
   }
 
   .moong-media {

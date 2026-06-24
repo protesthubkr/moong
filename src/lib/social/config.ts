@@ -92,7 +92,7 @@ export function getRequiredXBearerToken() {
 }
 
 function getStartIso() {
-  const value = readStringEnv("MOONG_SOCIAL_POST_START_DATE", "2026-06-01");
+  const value = readStringEnv("MOONG_SOCIAL_POST_START_DATE", "2026-05-01");
 
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     return new Date(`${value}T00:00:00+09:00`).toISOString();
@@ -104,5 +104,5 @@ function getStartIso() {
     return new Date(timestamp).toISOString();
   }
 
-  return new Date("2026-06-01T00:00:00+09:00").toISOString();
+  return new Date("2026-05-01T00:00:00+09:00").toISOString();
 }

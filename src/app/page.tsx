@@ -2,8 +2,10 @@ import Link from "next/link";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { getPublicMoongFeed } from "@/lib/social/repository";
 import type {
+  PublicMoongFeedItem,
   PublicMoongPost,
   SocialPostAttachment,
+  SocialPostContext,
   SocialPostLink,
 } from "@/lib/social/types";
 
@@ -26,7 +28,7 @@ export default async function Home() {
           <ol className="moong-feed">
             {items.map((item) => (
               <li className="moong-feed-item" key={item.id}>
-                <MoongFeedRow item={item} />
+                <MoongFeedItem item={item} />
               </li>
             ))}
           </ol>
@@ -53,8 +55,32 @@ async function loadFeed() {
   }
 }
 
+function MoongFeedItem({ item }: { item: PublicMoongFeedItem }) {
+  if (item.kind === "post") {
+    return <MoongFeedRow item={item.post} />;
+  }
+
+  return (
+    <div className="moong-quote-group">
+      <div className="moong-quote-posts">
+        {item.posts.map((post) => (
+          <MoongFeedRow item={post} key={post.id} />
+        ))}
+      </div>
+      <OriginalPostCard
+        original={item.original}
+        quotedPlatformPostId={item.quotedPlatformPostId}
+      />
+    </div>
+  );
+}
+
 function MoongFeedRow({ item }: { item: PublicMoongPost }) {
   const displayTime = formatPostTime(item.postedAt);
+  const displayText = getTweetPreviewText(item.text);
+  const parentText = item.parentContext?.text
+    ? getTweetPreviewText(item.parentContext.text)
+    : null;
 
   return (
     <article className="moong-row">
@@ -82,11 +108,11 @@ function MoongFeedRow({ item }: { item: PublicMoongPost }) {
                 @{item.parentContext.authorUsername ?? "origin"}
               </span>
               <span className="moong-parent-text">
-                {item.parentContext.text ?? "원글"}
+                {parentText ?? item.parentContext.text ?? "원글"}
               </span>
             </span>
           ) : null}
-          <span className="moong-text">{item.text}</span>
+          <span className="moong-text">{displayText}</span>
         </a>
 
         <PostAttachments attachments={item.attachments} links={item.links} />
@@ -99,6 +125,50 @@ function MoongFeedRow({ item }: { item: PublicMoongPost }) {
       </div>
     </article>
   );
+}
+
+function OriginalPostCard({
+  original,
+  quotedPlatformPostId,
+}: {
+  original: SocialPostContext | null;
+  quotedPlatformPostId: string;
+}) {
+  const href =
+    original?.sourceUrl ?? `https://x.com/i/web/status/${quotedPlatformPostId}`;
+  const author = original?.authorUsername
+    ? `@${original.authorUsername}`
+    : "original";
+  const originalText = original?.text ? getTweetPreviewText(original.text) : "";
+
+  return (
+    <a
+      className="moong-original-card"
+      href={href}
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      <span className="moong-original-label">원문</span>
+      <span className="moong-original-author">{author}</span>
+      {originalText ? (
+        <span className="moong-original-text">{originalText}</span>
+      ) : (
+        <span className="moong-original-text moong-original-text--empty">
+          원문 내용을 가져오지 못했습니다.
+        </span>
+      )}
+    </a>
+  );
+}
+
+function getTweetPreviewText(value: string) {
+  const paragraphs = value
+    .replace(/\r\n/g, "\n")
+    .split(/\n+/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
+  return paragraphs.slice(0, 2).join("\n\n");
 }
 
 function PostAttachments({

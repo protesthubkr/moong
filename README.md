@@ -30,7 +30,7 @@ npm run dev
 
 - `X_BEARER_TOKEN`
 - `MOONG_X_FOLLOWING_USERNAME=wordybirdbird`
-- `MOONG_SOCIAL_POST_START_DATE=2026-06-01`
+- `MOONG_SOCIAL_POST_START_DATE=2026-05-01`
 - `MOONG_LIKE_THRESHOLD=150`
 - `MOONG_METRIC_REFRESH_WINDOW_HOURS=168`
 - `MOONG_SCORE_LIKE_WEIGHT=1`
@@ -78,7 +78,7 @@ Post 수집 dry-run:
 Invoke-RestMethod -Method Post "http://localhost:3000/api/ingest/social-posts" `
   -Headers $headers `
   -ContentType "application/json" `
-  -Body (@{ dryRun = $true; sourceLimit = 3; startDate = "2026-06-01" } | ConvertTo-Json)
+  -Body (@{ dryRun = $true; sourceLimit = 3; startDate = "2026-05-01" } | ConvertTo-Json)
 ```
 
 ## Checks
