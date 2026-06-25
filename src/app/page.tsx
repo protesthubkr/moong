@@ -1,5 +1,5 @@
 import { MoongFeedPage } from "@/app/feed/feed-page";
-import { getPublicMoongFeed } from "@/lib/social/repository";
+import { getPublicMoongFeed } from "@/lib/social/repository/public-feed";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
 export const dynamic = "force-dynamic";

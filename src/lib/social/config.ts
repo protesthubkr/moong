@@ -1,4 +1,9 @@
-import { readIntegerEnv, readNumberEnv, readStringEnv } from "@/lib/env";
+import {
+  readIntegerEnv,
+  readNumberEnv,
+  readRequiredStringEnv,
+  readStringEnv,
+} from "@/lib/env";
 import type { ScoreWeights } from "./types";
 
 export type MoongConfig = {
@@ -82,13 +87,10 @@ export function getMoongConfig(): MoongConfig {
 }
 
 export function getRequiredXBearerToken() {
-  const token = process.env.X_BEARER_TOKEN?.trim();
-
-  if (!token) {
-    throw new Error("X_BEARER_TOKEN is not configured.");
-  }
-
-  return token;
+  return readRequiredStringEnv(
+    "X_BEARER_TOKEN",
+    "X_BEARER_TOKEN is not configured.",
+  );
 }
 
 function getStartIso() {

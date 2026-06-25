@@ -48,7 +48,7 @@ export function FeedLoadWindow({
     startY: 0,
   });
   const [isScrollRestoring, setIsScrollRestoring] = useState(false);
-  const [isSnapSuppressed, setIsSnapSuppressed] = useState(false);
+  const [isAnchorHeld, setIsAnchorHeld] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
   const [visibleCount, setVisibleCount] = useState(() =>
     Math.min(batchSize, totalCount),
@@ -84,39 +84,39 @@ export function FeedLoadWindow({
 
     anchorRef.current = captureAnchor(rootRef.current);
     setIsScrollRestoring(true);
-    setIsSnapSuppressed(true);
+    setIsAnchorHeld(true);
     setVisibleCount((current) => Math.min(totalCount, current + batchSize));
   }, [batchSize, hasMore, isScrollRestoring, totalCount]);
 
   useEffect(() => {
-    if (!isSnapSuppressed || isScrollRestoring) {
+    if (!isAnchorHeld || isScrollRestoring) {
       return;
     }
 
-    const releaseSnapSuppression = () => {
+    const releaseAnchor = () => {
       anchorRef.current = null;
-      setIsSnapSuppressed(false);
+      setIsAnchorHeld(false);
     };
 
-    window.addEventListener("wheel", releaseSnapSuppression, { passive: true });
-    window.addEventListener("touchstart", releaseSnapSuppression, {
+    window.addEventListener("wheel", releaseAnchor, { passive: true });
+    window.addEventListener("touchstart", releaseAnchor, {
       passive: true,
     });
-    window.addEventListener("keydown", releaseSnapSuppression);
+    window.addEventListener("keydown", releaseAnchor);
 
     return () => {
-      window.removeEventListener("wheel", releaseSnapSuppression);
-      window.removeEventListener("touchstart", releaseSnapSuppression);
-      window.removeEventListener("keydown", releaseSnapSuppression);
+      window.removeEventListener("wheel", releaseAnchor);
+      window.removeEventListener("touchstart", releaseAnchor);
+      window.removeEventListener("keydown", releaseAnchor);
     };
-  }, [isScrollRestoring, isSnapSuppressed]);
+  }, [isAnchorHeld, isScrollRestoring]);
 
   useLayoutEffect(() => {
     const anchor = anchorRef.current;
 
     if (!anchor) {
       setIsScrollRestoring(false);
-      setIsSnapSuppressed(false);
+      setIsAnchorHeld(false);
       return;
     }
 
@@ -218,7 +218,6 @@ export function FeedLoadWindow({
     <div
       className="moong-feed-window"
       data-pull-state={pullState}
-      data-scroll-restoring={isSnapSuppressed ? "true" : undefined}
       onPointerCancel={handlePointerEnd}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}

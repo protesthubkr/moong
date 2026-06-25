@@ -1,3 +1,5 @@
+import { readStringEnv } from "@/lib/env";
+
 const DEFAULT_REASONING_EFFORT = "low";
 const REASONING_EFFORTS = new Set([
   "none",
@@ -23,7 +25,7 @@ export function getReasoningRequestOptions(
 
   const defaultEffort = options.defaultEffort ?? DEFAULT_REASONING_EFFORT;
   const effortEnvKey = options.effortEnvKey ?? "OPENAI_REASONING_EFFORT";
-  const configuredEffort = process.env[effortEnvKey]?.trim().toLowerCase();
+  const configuredEffort = readStringEnv(effortEnvKey).toLowerCase();
   const effort = configuredEffort || defaultEffort;
 
   if (!REASONING_EFFORTS.has(effort)) {

@@ -2,6 +2,16 @@ export function readStringEnv(key: string, fallback = "") {
   return process.env[key]?.trim() || fallback;
 }
 
+export function readRequiredStringEnv(key: string, message?: string) {
+  const value = readStringEnv(key);
+
+  if (!value) {
+    throw new Error(message ?? `${key} is not configured.`);
+  }
+
+  return value;
+}
+
 export function readIntegerEnv(
   key: string,
   {
@@ -27,6 +37,28 @@ export function readIntegerEnv(
   }
 
   return value;
+}
+
+export function readJsonRecordEnv(key: string) {
+  return parseJsonRecord(process.env[key]);
+}
+
+function parseJsonRecord(value?: string) {
+  if (!value?.trim()) {
+    return {};
+  }
+
+  try {
+    const parsed = JSON.parse(value) as unknown;
+
+    return isRecord(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
 export function readNumberEnv(

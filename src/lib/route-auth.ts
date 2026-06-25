@@ -1,11 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { readStringEnv } from "@/lib/env";
 
 export function isCronRunAuthorized(request: NextRequest) {
-  return isBearerAuthorized(request, process.env.CRON_SECRET);
+  return isBearerAuthorized(request, readStringEnv("CRON_SECRET"));
 }
 
 export function isManualRunAuthorized(request: NextRequest) {
-  return isBearerAuthorized(request, process.env.OPS_RUN_SECRET);
+  return isBearerAuthorized(request, readStringEnv("OPS_RUN_SECRET"));
 }
 
 export function unauthorized() {
@@ -20,9 +21,7 @@ export async function readJsonBody<T extends Record<string, unknown>>(
   return isPlainObject(payload) ? (payload as T) : ({} as T);
 }
 
-function isBearerAuthorized(request: NextRequest, expected?: string) {
-  const expectedToken = expected?.trim();
-
+function isBearerAuthorized(request: NextRequest, expectedToken: string) {
   if (!expectedToken) {
     return false;
   }

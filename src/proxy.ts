@@ -1,19 +1,20 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { readStringEnv } from "@/lib/env";
 
 export function proxy(request: NextRequest) {
   if (!request.nextUrl.pathname.startsWith("/ops")) {
     return NextResponse.next();
   }
 
-  const secret = process.env.OPS_SECRET_KEY?.trim();
+  const secret = readStringEnv("OPS_SECRET_KEY");
   const key = request.nextUrl.searchParams.get("key")?.trim();
 
   if (secret && key === secret) {
     return NextResponse.next();
   }
 
-  const user = process.env.OPS_BASIC_USER?.trim();
-  const password = process.env.OPS_BASIC_PASSWORD?.trim();
+  const user = readStringEnv("OPS_BASIC_USER");
+  const password = readStringEnv("OPS_BASIC_PASSWORD");
 
   if (!user || !password) {
     return process.env.NODE_ENV === "production"

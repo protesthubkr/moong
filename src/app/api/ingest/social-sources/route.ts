@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import {
   isCronRunAuthorized,
   isManualRunAuthorized,
@@ -6,6 +6,11 @@ import {
   unauthorized,
 } from "@/lib/route-auth";
 import { refreshXFollowingSources } from "@/lib/social/ingest";
+import {
+  parseBooleanOption,
+  parseIntegerOption,
+  runJsonJob,
+} from "../options";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -27,40 +32,14 @@ export async function POST(request: NextRequest) {
   const body = await readJsonBody(request);
 
   return runRefresh({
-    dryRun: parseBoolean(body.dryRun),
-    maxAccounts: parseInteger(body.maxAccounts),
+    dryRun: parseBooleanOption(body.dryRun),
+    maxAccounts: parseIntegerOption(body.maxAccounts),
   });
 }
 
 async function runRefresh(options: { dryRun?: boolean; maxAccounts?: number }) {
-  try {
-    return NextResponse.json(await refreshXFollowingSources(options));
-  } catch (error) {
-    return NextResponse.json(
-      {
-        error:
-          process.env.NODE_ENV === "production"
-            ? "Source refresh failed"
-            : error instanceof Error
-              ? error.message
-              : String(error),
-      },
-      { status: 500 },
-    );
-  }
-}
-
-function parseBoolean(value: unknown) {
-  return typeof value === "boolean" ? value : undefined;
-}
-
-function parseInteger(value: unknown) {
-  const parsed =
-    typeof value === "number"
-      ? value
-      : typeof value === "string"
-        ? Number.parseInt(value, 10)
-        : Number.NaN;
-
-  return Number.isFinite(parsed) ? parsed : undefined;
+  return runJsonJob(
+    () => refreshXFollowingSources(options),
+    "Source refresh failed",
+  );
 }

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import {
   isCronRunAuthorized,
   isManualRunAuthorized,
@@ -6,6 +6,12 @@ import {
   unauthorized,
 } from "@/lib/route-auth";
 import { runSocialPostIngest } from "@/lib/social/ingest";
+import {
+  parseBooleanOption,
+  parseIntegerOption,
+  parseStringOption,
+  runJsonJob,
+} from "../options";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 600;
@@ -27,11 +33,11 @@ export async function POST(request: NextRequest) {
   const body = await readJsonBody(request);
 
   return runIngest({
-    dryRun: parseBoolean(body.dryRun),
-    maxPages: parseInteger(body.maxPages),
-    sourceKey: parseString(body.sourceKey ?? body.source),
-    sourceLimit: parseInteger(body.sourceLimit),
-    startDate: parseString(body.startDate),
+    dryRun: parseBooleanOption(body.dryRun),
+    maxPages: parseIntegerOption(body.maxPages),
+    sourceKey: parseStringOption(body.sourceKey ?? body.source),
+    sourceLimit: parseIntegerOption(body.sourceLimit),
+    startDate: parseStringOption(body.startDate),
   });
 }
 
@@ -42,38 +48,5 @@ async function runIngest(options: {
   sourceLimit?: number;
   startDate?: string;
 }) {
-  try {
-    return NextResponse.json(await runSocialPostIngest(options));
-  } catch (error) {
-    return NextResponse.json(
-      {
-        error:
-          process.env.NODE_ENV === "production"
-            ? "Post ingest failed"
-            : error instanceof Error
-              ? error.message
-              : String(error),
-      },
-      { status: 500 },
-    );
-  }
-}
-
-function parseBoolean(value: unknown) {
-  return typeof value === "boolean" ? value : undefined;
-}
-
-function parseInteger(value: unknown) {
-  const parsed =
-    typeof value === "number"
-      ? value
-      : typeof value === "string"
-        ? Number.parseInt(value, 10)
-        : Number.NaN;
-
-  return Number.isFinite(parsed) ? parsed : undefined;
-}
-
-function parseString(value: unknown) {
-  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+  return runJsonJob(() => runSocialPostIngest(options), "Post ingest failed");
 }

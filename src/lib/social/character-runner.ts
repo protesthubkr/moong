@@ -12,7 +12,7 @@ import {
   getSocialPostCharacterGateLimit,
 } from "./character-config";
 import { runSocialPostCharacterGateWithLlm } from "./character-openai";
-import { createScanRun, finishScanRun } from "./repository";
+import { createScanRun, finishScanRun } from "./repository/scan-runs";
 
 export type CharacterGateOptions = {
   concurrency?: number;

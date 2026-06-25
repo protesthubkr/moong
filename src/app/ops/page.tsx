@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { getMoongConfig } from "@/lib/social/config";
-import { getOpsData } from "@/lib/social/repository";
+import { getOpsData } from "@/lib/social/repository/ops";
 
 export const dynamic = "force-dynamic";
 

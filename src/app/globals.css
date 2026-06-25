@@ -28,6 +28,7 @@
   --x-text-line-height: 20px;
   --x-text-size: 15px;
   --x-text-weight: 400;
+  --topbar-overscroll-guard-height: 32px;
 }
 
 @theme inline {
@@ -45,15 +46,6 @@
 html {
   background: var(--background);
   overflow-x: clip;
-}
-
-html:has(.moong-feed) {
-  scroll-snap-type: y mandatory;
-  scroll-padding-top: 64px;
-}
-
-html:has(.moong-feed-window[data-scroll-restoring="true"]) {
-  scroll-snap-type: none;
 }
 
 body {
@@ -81,6 +73,18 @@ select {
 .moong-page {
   min-height: 100vh;
   padding: 0 clamp(14px, 3vw, 36px) 48px;
+}
+
+.moong-page::before {
+  background: #ffffff;
+  content: "";
+  height: var(--topbar-overscroll-guard-height);
+  left: 0;
+  pointer-events: none;
+  position: fixed;
+  right: 0;
+  top: calc(-1 * var(--topbar-overscroll-guard-height));
+  z-index: 19;
 }
 
 .moong-topbar {
@@ -562,9 +566,6 @@ select {
   display: grid;
   gap: 10px;
   grid-template-columns: 108px minmax(0, 1fr);
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-  scroll-margin-top: 64px;
 }
 
 .moong-author {

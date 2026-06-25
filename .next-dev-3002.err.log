@@ -1,0 +1,576 @@
+⨯ ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  [90m2 |[0m [36mimport[0m [36mtype[0m { [33mPublicMoongFeedItem[0m } [36mfrom[0m [32m"@/lib/social/types"[0m;
+  [90m3 |[0m [36mimport[0m { [33mFeedLoadWindow[0m } [36mfrom[0m [32m"../feed-load-window"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { [33mMessageStepScroll[0m } [36mfrom[0m [32m"../message-step-scroll"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { [33mMoongPartyFilter[0m } [36mfrom[0m [32m"../moong-party-filter"[0m;
+  [90m6 |[0m [36mimport[0m { [33mScrollToBottom[0m } [36mfrom[0m [32m"../scroll-to-bottom"[0m;
+  [90m7 |[0m [36mimport[0m { [33mMoongFeedItem[0m } [36mfrom[0m [32m"./feed-item"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[browser] ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found 
+    at handleErrors (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found 
+    at handleErrors (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found 
+    at handleErrors (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found 
+    at handleErrors (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found 
+    at handleErrors (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found 
+    at handleErrors (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found 
+    at handleErrors (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+⨯ ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  [90m2 |[0m [36mimport[0m [36mtype[0m { [33mPublicMoongFeedItem[0m } [36mfrom[0m [32m"@/lib/social/types"[0m;
+  [90m3 |[0m [36mimport[0m { [33mFeedLoadWindow[0m } [36mfrom[0m [32m"../feed-load-window"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { [33mMessageStepScroll[0m } [36mfrom[0m [32m"../message-step-scroll"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { [33mMoongPartyFilter[0m } [36mfrom[0m [32m"../moong-party-filter"[0m;
+  [90m6 |[0m [36mimport[0m { [33mScrollToBottom[0m } [36mfrom[0m [32m"../scroll-to-bottom"[0m;
+  [90m7 |[0m [36mimport[0m { [33mMoongFeedItem[0m } [36mfrom[0m [32m"./feed-item"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  [90m2 |[0m [36mimport[0m [36mtype[0m { [33mPublicMoongFeedItem[0m } [36mfrom[0m [32m"@/lib/social/types"[0m;
+  [90m3 |[0m [36mimport[0m { [33mFeedLoadWindow[0m } [36mfrom[0m [32m"../feed-load-window"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { [33mMessageStepScroll[0m } [36mfrom[0m [32m"../message-step-scroll"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { [33mMoongPartyFilter[0m } [36mfrom[0m [32m"../moong-party-filter"[0m;
+  [90m6 |[0m [36mimport[0m { [33mScrollToBottom[0m } [36mfrom[0m [32m"../scroll-to-bottom"[0m;
+  [90m7 |[0m [36mimport[0m { [33mMoongFeedItem[0m } [36mfrom[0m [32m"./feed-item"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  [90m2 |[0m [36mimport[0m [36mtype[0m { [33mPublicMoongFeedItem[0m } [36mfrom[0m [32m"@/lib/social/types"[0m;
+  [90m3 |[0m [36mimport[0m { [33mFeedLoadWindow[0m } [36mfrom[0m [32m"../feed-load-window"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { [33mMessageStepScroll[0m } [36mfrom[0m [32m"../message-step-scroll"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { [33mMoongPartyFilter[0m } [36mfrom[0m [32m"../moong-party-filter"[0m;
+  [90m6 |[0m [36mimport[0m { [33mScrollToBottom[0m } [36mfrom[0m [32m"../scroll-to-bottom"[0m;
+  [90m7 |[0m [36mimport[0m { [33mMoongFeedItem[0m } [36mfrom[0m [32m"./feed-item"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[browser] Uncaught Error: ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (Error: ./src/app/feed/feed-page.tsx:4:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (Error: (./src/app/feed/feed-page.tsx:4:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+[browser] ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found 
+    at handleErrors (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found 
+    at handleErrors (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] Uncaught Error: ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (Error: ./src/app/feed/feed-page.tsx:4:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (Error: (./src/app/feed/feed-page.tsx:4:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+[browser] ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found 
+    at handleErrors (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found 
+    at handleErrors (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found 
+    at handleErrors (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found 
+    at handleErrors (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] Uncaught Error: ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (Error: ./src/app/feed/feed-page.tsx:4:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (Error: (./src/app/feed/feed-page.tsx:4:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+[browser] ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found 
+    at handleErrors (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found 
+    at handleErrors (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found 
+    at handleErrors (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] Uncaught Error: ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (Error: ./src/app/feed/feed-page.tsx:4:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (Error: (./src/app/feed/feed-page.tsx:4:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+[browser] ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found 
+    at handleErrors (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found 
+    at handleErrors (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found 
+    at handleErrors (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./src/app/feed/feed-page.tsx:4:1
+Module not found: Can't resolve '../message-step-scroll'
+  2 | import type { PublicMoongFeedItem } from "@/lib/social/types";
+  3 | import { FeedLoadWindow } from "../feed-load-window";
+> 4 | import { MessageStepScroll } from "../message-step-scroll";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { MoongPartyFilter } from "../moong-party-filter";
+  6 | import { ScrollToBottom } from "../scroll-to-bottom";
+  7 | import { MoongFeedItem } from "./feed-item";
+
+Import trace:
+  Server Component:
+    ./src/app/feed/feed-page.tsx
+    ./src/app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found 
+    at handleErrors (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/ghlee/OneDrive/문서/protest/moong/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)

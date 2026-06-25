@@ -1,3 +1,4 @@
+import { readJsonRecordEnv } from "@/lib/env";
 import type { PublicMoongPost, SocialPostContext } from "./types";
 
 export type SocialSourceColorStyle = {
@@ -491,7 +492,7 @@ function getSourceColorKeyOverrides() {
   }
 
   sourceColorKeyOverrides = new Map();
-  const parsed = parseJsonRecord(process.env.MOONG_SOURCE_COLOR_KEYS);
+  const parsed = readJsonRecordEnv("MOONG_SOURCE_COLOR_KEYS");
 
   for (const [sourceKey, colorKey] of Object.entries(parsed)) {
     if (typeof colorKey !== "string") {
@@ -517,7 +518,7 @@ function getPaletteOverrides() {
   }
 
   paletteOverrides = new Map();
-  const parsed = parseJsonRecord(process.env.MOONG_COLOR_PALETTES);
+  const parsed = readJsonRecordEnv("MOONG_COLOR_PALETTES");
 
   for (const [paletteKey, value] of Object.entries(parsed)) {
     if (!isRecord(value)) {
@@ -560,20 +561,6 @@ const SOCIAL_COLOR_TOKENS = [
   "--party-shadow",
   "--party-soft",
 ] as const;
-
-function parseJsonRecord(value?: string) {
-  if (!value?.trim()) {
-    return {};
-  }
-
-  try {
-    const parsed = JSON.parse(value) as unknown;
-
-    return isRecord(parsed) ? parsed : {};
-  } catch {
-    return {};
-  }
-}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);

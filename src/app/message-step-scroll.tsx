@@ -221,8 +221,7 @@ function getGapStepTargetRow(rows: HTMLElement[], direction: -1 | 1) {
     return (
       rows.find(
         (row) => getRowDocumentTop(row) >= anchorTop - ROW_BOUNDARY_EPSILON,
-      ) ??
-      null
+      ) ?? null
     );
   }
 

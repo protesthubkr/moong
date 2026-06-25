@@ -7,17 +7,18 @@ import {
   type MoongConfig,
 } from "./config";
 import {
-  createScanRun,
-  finishScanRun,
+  refreshTrackedXPostMetrics,
+  upsertXPost,
+} from "./repository/posts";
+import { createScanRun, finishScanRun } from "./repository/scan-runs";
+import {
   getDisabledXSourceIdentities,
   getEnabledXSourcesForIngest,
   markUnfollowedXSources,
   markXSourceFailed,
   markXSourceScanned,
-  refreshTrackedXPostMetrics,
-  upsertXPost,
   upsertXSource,
-} from "./repository";
+} from "./repository/sources";
 import type { SocialSource, XPost } from "./types";
 import {
   fetchFollowingAccountsForUser,

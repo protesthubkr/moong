@@ -1,3 +1,5 @@
+import { readIntegerEnv, readStringEnv } from "@/lib/env";
+
 type LlmAttemptFailure = {
   errorMessage: string;
   model: string;
@@ -65,7 +67,7 @@ export function getLlmModelFallbackList({
   primaryModel: string;
 }) {
   const fallbackModels = fallbackEnvKeys.flatMap((key) =>
-    (process.env[key]?.trim() ?? "")
+    readStringEnv(key)
       .split(",")
       .map((item) => item.trim()),
   );
@@ -92,18 +94,21 @@ function shouldRetryCurrentModel({
 }
 
 function getAttemptsForModel() {
-  const value = process.env.OPENAI_MOONG_LLM_RETRY_ATTEMPTS;
-  const parsed = value ? Number.parseInt(value, 10) : 2;
-  const retries = Number.isFinite(parsed) ? parsed : 2;
-
-  return Math.min(Math.max(retries, 0), 5) + 1;
+  return (
+    readIntegerEnv("OPENAI_MOONG_LLM_RETRY_ATTEMPTS", {
+      defaultValue: 2,
+      max: 5,
+      min: 0,
+    }) + 1
+  );
 }
 
 function getRetryDelayMs(attempt: number) {
-  const value = process.env.OPENAI_MOONG_LLM_RETRY_BASE_DELAY_MS;
-  const parsed = value ? Number.parseInt(value, 10) : 1500;
-  const baseMs = Number.isFinite(parsed) ? parsed : 1500;
-  const cappedBaseMs = Math.min(Math.max(baseMs, 250), 10000);
+  const cappedBaseMs = readIntegerEnv("OPENAI_MOONG_LLM_RETRY_BASE_DELAY_MS", {
+    defaultValue: 1500,
+    max: 10000,
+    min: 250,
+  });
 
   return cappedBaseMs * 2 ** attempt + Math.floor(Math.random() * 500);
 }
