@@ -109,10 +109,102 @@ create table if not exists public.social_post_metrics (
 create index if not exists social_post_metrics_score_idx
   on public.social_post_metrics (score desc, like_count desc);
 
+create table if not exists public.social_post_character_decisions (
+  post_id uuid primary key references public.social_posts(id) on delete cascade,
+  classifier_version text not null,
+  model_name text not null default '',
+  primary_character text not null
+    check (
+      primary_character in (
+        'emotional_essay',
+        'personal_miscellany',
+        'militant_declaration',
+        'gratitude_reflection',
+        'policy_explainer',
+        'field_note',
+        'campaign_mobilization',
+        'satirical_short_comment',
+        'argument_reply',
+        'quote_commentary',
+        'notice_or_resource',
+        'memorial_note',
+        'media_dependent',
+        'mixed_other'
+      )
+    ),
+  secondary_characters text[] not null default '{}'::text[]
+    check (
+      secondary_characters <@ array[
+        'emotional_essay',
+        'personal_miscellany',
+        'militant_declaration',
+        'gratitude_reflection',
+        'policy_explainer',
+        'field_note',
+        'campaign_mobilization',
+        'satirical_short_comment',
+        'argument_reply',
+        'quote_commentary',
+        'notice_or_resource',
+        'memorial_note',
+        'media_dependent',
+        'mixed_other'
+      ]::text[]
+    ),
+  tone text not null
+    check (
+      tone in (
+        'cold',
+        'critical_logical',
+        'emotional',
+        'matter_of_fact',
+        'solemn',
+        'urgent',
+        'warm',
+        'wry'
+      )
+    ),
+  context_dependency text not null
+    check (
+      context_dependency in (
+        'needs_media',
+        'needs_parent',
+        'needs_quote',
+        'standalone'
+      )
+    ),
+  publicness text not null
+    check (
+      publicness in (
+        'campaign',
+        'personal_public',
+        'private_like',
+        'public_issue'
+      )
+    ),
+  confidence numeric not null default 0
+    check (confidence >= 0 and confidence <= 1),
+  reason text not null default '',
+  raw_output jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists social_post_character_decisions_character_idx
+  on public.social_post_character_decisions (
+    classifier_version,
+    primary_character,
+    confidence desc
+  );
+
+create index if not exists social_post_character_decisions_updated_idx
+  on public.social_post_character_decisions (updated_at desc);
+
 create table if not exists public.social_scan_runs (
   id uuid primary key default gen_random_uuid(),
   platform text not null check (platform in ('x', 'facebook')),
-  run_type text not null check (run_type in ('source_refresh', 'post_ingest')),
+  run_type text not null
+    check (run_type in ('source_refresh', 'post_ingest', 'character_gate')),
   status text not null default 'running'
     check (status in ('running', 'succeeded', 'failed')),
   dry_run boolean not null default false,
@@ -156,17 +248,27 @@ create trigger set_updated_at_social_post_metrics
 before update on public.social_post_metrics
 for each row execute function public.set_updated_at();
 
+drop trigger if exists set_updated_at_social_post_character_decisions
+  on public.social_post_character_decisions;
+create trigger set_updated_at_social_post_character_decisions
+before update on public.social_post_character_decisions
+for each row execute function public.set_updated_at();
+
 alter table public.social_sources enable row level security;
 alter table public.social_posts enable row level security;
 alter table public.social_post_metrics enable row level security;
+alter table public.social_post_character_decisions enable row level security;
 alter table public.social_scan_runs enable row level security;
 
 alter table public.social_sources force row level security;
 alter table public.social_posts force row level security;
 alter table public.social_post_metrics force row level security;
+alter table public.social_post_character_decisions force row level security;
 alter table public.social_scan_runs force row level security;
 
 revoke all on public.social_sources from public, anon, authenticated;
 revoke all on public.social_posts from public, anon, authenticated;
 revoke all on public.social_post_metrics from public, anon, authenticated;
+revoke all on public.social_post_character_decisions
+  from public, anon, authenticated;
 revoke all on public.social_scan_runs from public, anon, authenticated;

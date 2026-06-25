@@ -82,6 +82,7 @@ export type PublicMoongPost = {
   promotedAt: string | null;
   quotedPlatformPostId: string | null;
   quoteContext: SocialPostContext | null;
+  sourceKey: string;
   sourceUrl: string;
   text: string;
 };

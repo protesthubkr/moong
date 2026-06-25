@@ -10,6 +10,18 @@
   --accent: #0f8b67;
   --accent-soft: #dff3e9;
   --ink-soft: #2d3430;
+  --party-accent: #6e716b;
+  --party-avatar-border: rgba(104, 108, 101, 0.48);
+  --party-card-border: rgba(104, 108, 101, 0.16);
+  --party-card-hover: rgba(104, 108, 101, 0.34);
+  --party-card-rim: rgba(104, 108, 101, 0.22);
+  --party-focus: rgba(104, 108, 101, 0.62);
+  --party-glow: rgba(104, 108, 101, 0.52);
+  --party-ink: #41443f;
+  --party-link-bg: rgba(247, 247, 244, 0.82);
+  --party-parent-bg: #f0f1ed;
+  --party-shadow: rgba(104, 108, 101, 0.13);
+  --party-soft: #f1f1ee;
 }
 
 @theme inline {
@@ -148,8 +160,12 @@ select {
 
 .moong-avatar {
   align-items: center;
-  background: #151514;
+  background: var(--party-accent);
+  border: 1px solid var(--party-avatar-border);
   border-radius: 50%;
+  box-shadow:
+    0 0 0 2px var(--surface),
+    0 0 9px 2px var(--party-glow);
   color: #ffffff;
   display: inline-flex;
   flex: 0 0 auto;
@@ -206,9 +222,11 @@ select {
 
 .moong-bubble {
   background: var(--surface);
-  border: 1px solid rgba(23, 23, 22, 0.08);
+  border: 1px solid var(--party-card-border);
   border-radius: 7px 18px 18px 18px;
-  box-shadow: 0 10px 28px rgba(24, 32, 28, 0.08);
+  box-shadow:
+    inset 2px 0 0 var(--party-card-rim),
+    0 10px 28px rgba(24, 32, 28, 0.08);
   color: var(--foreground);
   cursor: pointer;
   display: block;
@@ -222,8 +240,11 @@ select {
 }
 
 .moong-bubble:hover {
-  border-color: rgba(15, 139, 103, 0.4);
-  box-shadow: 0 14px 34px rgba(24, 32, 28, 0.12);
+  border-color: var(--party-card-hover);
+  box-shadow:
+    inset 2px 0 0 var(--party-accent),
+    0 14px 34px rgba(24, 32, 28, 0.12),
+    0 0 8px -3px var(--party-shadow);
   transform: translateY(-1px);
 }
 
@@ -239,7 +260,7 @@ select {
 }
 
 .moong-bubble-hit-area:focus-visible {
-  outline: 2px solid rgba(15, 139, 103, 0.72);
+  outline: 2px solid var(--party-focus);
   outline-offset: 3px;
 }
 
@@ -251,10 +272,10 @@ select {
 }
 
 .moong-parent {
-  background: var(--accent-soft);
-  border-left: 3px solid var(--accent);
+  background: var(--party-parent-bg);
+  border-left: 3px solid var(--party-accent);
   border-radius: 5px;
-  color: #184536;
+  color: var(--party-ink);
   display: block;
   margin-bottom: 10px;
   padding: 9px 10px;
@@ -311,7 +332,7 @@ select {
 
 .moong-parent .moong-clamped-text-ellipsis {
   background:
-    linear-gradient(90deg, rgba(223, 243, 233, 0), var(--accent-soft) 32%);
+    linear-gradient(90deg, rgba(255, 255, 255, 0), var(--party-parent-bg) 32%);
 }
 
 .moong-attachments {
@@ -320,7 +341,9 @@ select {
   gap: 8px;
   margin-top: 8px;
   max-width: min(100%, 580px);
+  position: relative;
   width: 100%;
+  z-index: 2;
 }
 
 .moong-media-carousel {
@@ -329,6 +352,7 @@ select {
 }
 
 .moong-media-strip {
+  align-items: flex-start;
   display: flex;
   gap: 6px;
   overflow-x: hidden;
@@ -381,13 +405,14 @@ select {
 }
 
 .moong-media--video {
+  background: #111111;
   cursor: default;
 }
 
 .moong-media-strip--1 .moong-media--video {
-  flex-basis: min(100%, 580px);
+  flex-basis: auto;
   max-width: 100%;
-  width: min(100%, 580px);
+  width: fit-content;
 }
 
 .moong-media-arrow {
@@ -459,12 +484,17 @@ select {
 
 .moong-media-video {
   background: #111111;
+  border-radius: inherit;
   display: block;
   height: auto;
   max-height: 420px;
+  max-width: 100%;
   object-fit: contain;
+  pointer-events: auto;
+  position: relative;
   touch-action: pan-y;
   width: 100%;
+  z-index: 3;
 }
 
 .moong-media-strip--1 .moong-media img {
@@ -474,7 +504,7 @@ select {
 }
 
 .moong-media-strip--1 .moong-media-video {
-  width: 100%;
+  width: auto;
 }
 
 .moong-youtube-embed {
@@ -562,9 +592,50 @@ select {
   right: 8px;
 }
 
+.moong-media--video .moong-media-kind {
+  display: none;
+}
+
+.moong-video-play-button {
+  align-items: center;
+  background: rgba(15, 15, 14, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 999px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.24);
+  cursor: pointer;
+  display: inline-flex;
+  height: 48px;
+  justify-content: center;
+  left: 50%;
+  padding: 0;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition:
+    background 160ms ease,
+    transform 160ms ease;
+  width: 48px;
+  z-index: 4;
+}
+
+.moong-video-play-button:hover {
+  background: rgba(15, 15, 14, 0.9);
+  transform: translate(-50%, -50%) scale(1.04);
+}
+
+.moong-video-play-button span {
+  border-bottom: 10px solid transparent;
+  border-left: 15px solid #ffffff;
+  border-top: 10px solid transparent;
+  display: block;
+  height: 0;
+  margin-left: 4px;
+  width: 0;
+}
+
 .moong-link-card {
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid var(--line);
+  background: var(--party-link-bg);
+  border: 1px solid var(--party-card-border);
   border-radius: 7px;
   display: flex;
   flex-direction: column;
@@ -575,11 +646,11 @@ select {
 }
 
 .moong-link-card:hover {
-  border-color: rgba(15, 139, 103, 0.45);
+  border-color: var(--party-card-hover);
 }
 
 .moong-link-host {
-  color: var(--accent);
+  color: var(--party-accent);
   font-size: 12px;
   font-weight: 720;
   line-height: 1.3;
@@ -604,11 +675,11 @@ select {
 
 .moong-original-card {
   align-self: flex-start;
-  background: rgba(255, 255, 255, 0.54);
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--accent);
+  background: var(--party-link-bg);
+  border: 1px solid var(--party-card-border);
+  border-left: 3px solid var(--party-accent);
   border-radius: 7px;
-  color: var(--ink-soft);
+  color: var(--party-ink);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -624,14 +695,14 @@ select {
 }
 
 .moong-original-card:hover {
-  background: rgba(255, 255, 255, 0.78);
-  border-color: rgba(15, 139, 103, 0.42);
+  background: var(--surface);
+  border-color: var(--party-card-hover);
 }
 
 .moong-original-card--embedded {
-  background: rgba(244, 246, 240, 0.86);
+  background: var(--party-parent-bg);
   border: 0;
-  border-left: 3px solid rgba(15, 139, 103, 0.7);
+  border-left: 3px solid var(--party-card-rim);
   box-shadow: none;
   margin-left: 0;
   margin-top: 12px;
@@ -641,7 +712,8 @@ select {
 }
 
 .moong-original-card--embedded:hover {
-  background: rgba(238, 243, 235, 0.96);
+  background: var(--party-link-bg);
+  border-left-color: var(--party-accent);
 }
 
 .moong-original-card--embedded .moong-original-label {
@@ -649,7 +721,7 @@ select {
 }
 
 .moong-original-card--embedded .moong-original-author {
-  color: var(--accent);
+  color: var(--party-accent);
   font-size: 11px;
   font-weight: 760;
 }
@@ -662,7 +734,7 @@ select {
 }
 
 .moong-original-label {
-  color: var(--accent);
+  color: var(--party-accent);
   font-size: 11px;
   font-weight: 760;
   letter-spacing: 0;
@@ -687,12 +759,12 @@ select {
 
 .moong-original-card .moong-clamped-text-ellipsis {
   background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0), #ffffff 32%);
+    linear-gradient(90deg, rgba(255, 255, 255, 0), var(--party-link-bg) 32%);
 }
 
 .moong-original-card--embedded .moong-clamped-text-ellipsis {
   background:
-    linear-gradient(90deg, rgba(244, 246, 240, 0), #f4f6f0 32%);
+    linear-gradient(90deg, rgba(255, 255, 255, 0), var(--party-parent-bg) 32%);
 }
 
 .moong-original-text--empty {

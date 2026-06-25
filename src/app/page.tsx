@@ -1,6 +1,11 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { getPublicMoongFeed } from "@/lib/social/repository";
+import {
+  getContextColorStyle,
+  getPostColorStyle,
+} from "@/lib/social/source-colors";
 import { ClampedText } from "./clamped-text";
 import { MediaCarousel } from "./media-carousel";
 import { MessageStepScroll } from "./message-step-scroll";
@@ -159,7 +164,7 @@ function MoongFeedRow({
     : null;
 
   return (
-    <article className="moong-row">
+    <article className="moong-row" style={getPostColorStyle(item) as CSSProperties}>
       <div className="moong-author">
         <span aria-hidden="true" className="moong-avatar">
           {item.authorProfileImageUrl ? (
@@ -192,7 +197,10 @@ function MoongFeedRow({
           />
           <span className="moong-bubble-body">
             {showParentContext && item.postType === "reply" && item.parentContext ? (
-              <span className="moong-parent">
+              <span
+                className="moong-parent"
+                style={getContextColorStyle(item.parentContext) as CSSProperties}
+              >
                 <span className="moong-parent-author">
                   {item.parentContext.authorName ??
                     item.parentContext.authorUsername ??
@@ -212,6 +220,7 @@ function MoongFeedRow({
               embedded
               original={embeddedOriginal.original}
               quotedPlatformPostId={embeddedOriginal.quotedPlatformPostId}
+              style={getContextColorStyle(embeddedOriginal.original) as CSSProperties}
             />
           ) : null}
         </div>
@@ -246,10 +255,12 @@ function OriginalPostCard({
   embedded = false,
   original,
   quotedPlatformPostId,
+  style,
 }: {
   embedded?: boolean;
   original: SocialPostContext | null;
   quotedPlatformPostId: string;
+  style?: CSSProperties;
 }) {
   const href =
     original?.sourceUrl ?? `https://x.com/i/web/status/${quotedPlatformPostId}`;
@@ -261,6 +272,7 @@ function OriginalPostCard({
       className={`moong-original-card${embedded ? " moong-original-card--embedded" : ""}`}
       href={href}
       rel="noopener noreferrer"
+      style={style}
       target="_blank"
     >
       <span className="moong-original-label">원문</span>

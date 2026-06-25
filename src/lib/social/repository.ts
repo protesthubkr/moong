@@ -48,6 +48,8 @@ type MetricRefreshCandidate = {
   posted_at: string | null;
 };
 
+type SocialScanRunType = "character_gate" | "post_ingest" | "source_refresh";
+
 const PUBLIC_POST_COLUMNS = [
   "id",
   "platform",
@@ -79,7 +81,7 @@ export async function createScanRun({
   dryRun: boolean;
   options: Record<string, unknown>;
   platform: SocialPlatform;
-  runType: "post_ingest" | "source_refresh";
+  runType: SocialScanRunType;
   supabase: SupabaseClient;
 }) {
   if (dryRun) {
@@ -884,9 +886,14 @@ async function updateExistingPostMetrics({
   const { error } = await supabase
     .from("social_posts")
     .update({
+      attachments: getPostAttachments(post),
+      links: getPostLinks(post),
       last_metric_checked_at: now,
+      last_seen_at: now,
       metrics_frozen_at: shouldPromote ? now : null,
       promoted_at: shouldPromote ? now : null,
+      raw_payload: post,
+      text_snapshot: getXPostText(post),
       visibility_status: shouldPromote
         ? "promoted"
         : shouldArchive
@@ -1073,6 +1080,7 @@ function mapPublicPostRow(row: SocialPostRow): PublicMoongPost {
     promotedAt: row.promoted_at,
     quotedPlatformPostId: row.quoted_platform_post_id ?? null,
     quoteContext: isObject(row.quote_context) ? row.quote_context : null,
+    sourceKey: source?.source_key ?? row.author_username,
     sourceUrl: row.source_url,
     text: row.text_snapshot,
   };

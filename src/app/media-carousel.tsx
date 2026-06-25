@@ -236,29 +236,13 @@ export function MediaCarousel({
 
           if (videoUrl) {
             return (
-              <div
-                className="moong-media moong-media--video"
+              <VideoMedia
+                attachment={attachment}
+                fallbackUrl={videoUrl}
                 key={key}
                 style={style}
-              >
-                <video
-                  className="moong-media-video"
-                  controls
-                  loop={attachment.type === "animated_gif"}
-                  muted={attachment.type === "animated_gif"}
-                  playsInline
-                  poster={attachment.previewImageUrl ?? undefined}
-                  preload="metadata"
-                  src={videoUrl}
-                >
-                  <a href={videoUrl} rel="noopener noreferrer" target="_blank">
-                    video
-                  </a>
-                </video>
-                <span className="moong-media-kind">
-                  {formatMediaKind(attachment.type)}
-                </span>
-              </div>
+                videoUrl={getVideoPlaybackUrl(videoUrl)}
+              />
             );
           }
 
@@ -321,12 +305,97 @@ export function MediaCarousel({
   );
 }
 
+function VideoMedia({
+  attachment,
+  fallbackUrl,
+  style,
+  videoUrl,
+}: {
+  attachment: SocialPostAttachment;
+  fallbackUrl: string;
+  style: CSSProperties | undefined;
+  videoUrl: string;
+}) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [playErrorMessage, setPlayErrorMessage] = useState("");
+  const [playFailed, setPlayFailed] = useState(false);
+  const [paused, setPaused] = useState(true);
+
+  const syncPaused = useCallback(() => {
+    setPaused(videoRef.current?.paused ?? true);
+  }, []);
+
+  const handlePlayClick = useCallback(
+    async (event: MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const video = videoRef.current;
+
+      if (!video) {
+        return;
+      }
+
+      try {
+        setPlayFailed(false);
+        setPlayErrorMessage("");
+        if (video.readyState === HTMLMediaElement.HAVE_NOTHING) {
+          video.load();
+        }
+        await video.play();
+        setPaused(video.paused);
+      } catch (error) {
+        setPlayErrorMessage(error instanceof Error ? error.message : String(error));
+        setPlayFailed(true);
+      }
+    },
+    [],
+  );
+
+  return (
+    <div className="moong-media moong-media--video" style={style}>
+      <video
+        className="moong-media-video"
+        controls
+        height={attachment.height ?? undefined}
+        loop={attachment.type === "animated_gif"}
+        muted={attachment.type === "animated_gif"}
+        onEnded={syncPaused}
+        onLoadedMetadata={syncPaused}
+        onPause={syncPaused}
+        onPlay={syncPaused}
+        playsInline
+        poster={attachment.previewImageUrl ?? undefined}
+        preload="none"
+        ref={videoRef}
+        width={attachment.width ?? undefined}
+      >
+        <source src={videoUrl} type="video/mp4" />
+        <a href={fallbackUrl} rel="noopener noreferrer" target="_blank">
+          video
+        </a>
+      </video>
+      {paused ? (
+        <button
+          aria-label={playFailed ? "Video failed to play" : "Play video"}
+          className="moong-video-play-button"
+          data-play-error={playErrorMessage || undefined}
+          onClick={handlePlayClick}
+          type="button"
+        >
+          <span aria-hidden="true" />
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
 function getMediaItemStyle(
   attachment: SocialPostAttachment,
   mediaCount: number,
   hasVideo: boolean,
 ): CSSProperties | undefined {
-  if (mediaCount <= 1 && !hasVideo) {
+  if (mediaCount <= 1 || hasVideo) {
     return undefined;
   }
 
@@ -368,6 +437,20 @@ function getPlayableAttachmentVideoUrl(attachment: SocialPostAttachment) {
       )
       .sort((a, b) => (b.bitRate ?? 0) - (a.bitRate ?? 0))[0]?.url ?? null
   );
+}
+
+function getVideoPlaybackUrl(value: string) {
+  try {
+    const url = new URL(value);
+
+    if (url.protocol === "https:" && url.hostname.toLowerCase() === "video.twimg.com") {
+      return `/api/social-media-proxy?url=${encodeURIComponent(url.toString())}`;
+    }
+  } catch {
+    return value;
+  }
+
+  return value;
 }
 
 function getAttachmentVariants(attachment: SocialPostAttachment) {
