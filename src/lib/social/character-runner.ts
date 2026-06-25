@@ -245,14 +245,16 @@ async function getSocialPostCharacterCandidates({
     .select(CHARACTER_CANDIDATE_SELECT)
     .eq("platform", "x")
     .in("visibility_status", statuses)
-    .eq("social_sources.enabled", true)
-    .eq("social_sources.is_following", true)
     .eq("social_sources.is_protected", false)
     .order("posted_at", { ascending: false, nullsFirst: false })
     .limit(fetchLimit);
 
   if (sourceKey) {
     query = query.eq("source_key", sourceKey.replace(/^@/, "").toLowerCase());
+  } else {
+    query = query
+      .eq("social_sources.enabled", true)
+      .eq("social_sources.is_following", true);
   }
 
   const { data, error } = await query;

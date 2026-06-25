@@ -2,6 +2,12 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { MoongConfig } from "./config";
+import { SOCIAL_POST_CHARACTER_CLASSIFIER_VERSION } from "./character-gate";
+import {
+  getPublicFeedSourceKeys,
+  shouldExposeByPublicFeedCharacterPolicy,
+  type PublicFeedCharacterDecisionRow,
+} from "./public-feed-policy";
 import { mapXMetrics } from "./scoring";
 import type {
   OpsRankingPost,
@@ -69,7 +75,7 @@ const PUBLIC_POST_COLUMNS = [
 ].join(",");
 
 const PUBLIC_POST_SELECT_WITH_SOURCE =
-  `${PUBLIC_POST_COLUMNS},social_sources!inner(is_following,enabled,is_protected,display_name,profile_image_url,source_key,username)`;
+  `${PUBLIC_POST_COLUMNS},social_sources!inner(is_following,enabled,is_protected,display_name,profile_image_url,source_key,username),social_post_character_decisions!inner(classifier_version,primary_character,secondary_characters)`;
 
 export async function createScanRun({
   dryRun,
@@ -494,14 +500,23 @@ export async function getPublicMoongFeed({
     return [];
   }
 
-  const feedWindowLimit = Math.max(limit * 2, limit);
+  const publicSourceKeys = getPublicFeedSourceKeys();
+
+  if (publicSourceKeys.length === 0) {
+    return [];
+  }
+
+  const feedWindowLimit = Math.min(Math.max(limit * 8, limit), 1000);
   const { data, error } = await supabase
     .from("social_posts")
     .select(PUBLIC_POST_SELECT_WITH_SOURCE)
     .eq("visibility_status", "promoted")
-    .eq("social_sources.is_following", true)
-    .eq("social_sources.enabled", true)
+    .in("source_key", publicSourceKeys)
     .eq("social_sources.is_protected", false)
+    .eq(
+      "social_post_character_decisions.classifier_version",
+      SOCIAL_POST_CHARACTER_CLASSIFIER_VERSION,
+    )
     .order("posted_at", { ascending: false, nullsFirst: false })
     .order("promoted_at", { ascending: false, nullsFirst: false })
     .limit(feedWindowLimit);
@@ -510,7 +525,9 @@ export async function getPublicMoongFeed({
     throw new Error(error.message);
   }
 
-  const promotedRows = (data ?? []) as unknown as SocialPostRow[];
+  const promotedRows = ((data ?? []) as unknown as SocialPostRow[]).filter(
+    passesPublicFeedCharacterPolicy,
+  );
   const quotedPlatformPostIds = Array.from(
     new Set(
       promotedRows
@@ -521,12 +538,18 @@ export async function getPublicMoongFeed({
   );
   const quoteRows = await getQuoteSiblingRows({
     quotedPlatformPostIds,
+    sourceKeys: publicSourceKeys,
     supabase,
   });
   const disabledSources = await getDisabledXSourceIdentities({ supabase });
+  const disabledSourceKeys = new Set(disabledSources.sourceKeys);
+
+  for (const sourceKey of publicSourceKeys) {
+    disabledSourceKeys.delete(sourceKey);
+  }
 
   return buildPublicFeedItems({
-    disabledSourceKeys: disabledSources.sourceKeys,
+    disabledSourceKeys,
     promotedRows,
     quoteRows,
   })
@@ -536,12 +559,14 @@ export async function getPublicMoongFeed({
 
 async function getQuoteSiblingRows({
   quotedPlatformPostIds,
+  sourceKeys,
   supabase,
 }: {
   quotedPlatformPostIds: string[];
+  sourceKeys: string[];
   supabase: SupabaseClient;
 }) {
-  if (quotedPlatformPostIds.length === 0) {
+  if (quotedPlatformPostIds.length === 0 || sourceKeys.length === 0) {
     return [];
   }
 
@@ -551,9 +576,12 @@ async function getQuoteSiblingRows({
     .eq("platform", "x")
     .eq("post_type", "quote")
     .neq("visibility_status", "skipped")
-    .eq("social_sources.is_following", true)
-    .eq("social_sources.enabled", true)
+    .in("source_key", sourceKeys)
     .eq("social_sources.is_protected", false)
+    .eq(
+      "social_post_character_decisions.classifier_version",
+      SOCIAL_POST_CHARACTER_CLASSIFIER_VERSION,
+    )
     .in("quoted_platform_post_id", quotedPlatformPostIds)
     .order("posted_at", { ascending: true, nullsFirst: false });
 
@@ -561,7 +589,9 @@ async function getQuoteSiblingRows({
     throw new Error(error.message);
   }
 
-  return (data ?? []) as unknown as SocialPostRow[];
+  return ((data ?? []) as unknown as SocialPostRow[]).filter(
+    passesPublicFeedCharacterPolicy,
+  );
 }
 
 function buildPublicFeedItems({
@@ -1046,6 +1076,10 @@ type SocialPostRow = {
   quote_context?: unknown;
   quoted_platform_post_id?: string | null;
   source_url: string;
+  social_post_character_decisions?:
+    | PublicFeedCharacterDecisionRow
+    | PublicFeedCharacterDecisionRow[]
+    | null;
   social_sources?: JoinedSocialSourceRow | JoinedSocialSourceRow[] | null;
   text_snapshot: string;
 };
@@ -1094,6 +1128,22 @@ function getJoinedSocialSource(
   }
 
   return source ?? null;
+}
+
+function passesPublicFeedCharacterPolicy(row: SocialPostRow) {
+  return shouldExposeByPublicFeedCharacterPolicy(
+    getJoinedCharacterDecision(row.social_post_character_decisions),
+  );
+}
+
+function getJoinedCharacterDecision(
+  decision: SocialPostRow["social_post_character_decisions"],
+): PublicFeedCharacterDecisionRow | null {
+  if (Array.isArray(decision)) {
+    return decision[0] ?? null;
+  }
+
+  return decision ?? null;
 }
 
 function getSourceDisplayNameOverride(source: JoinedSocialSourceRow | null) {
