@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { PublicMoongFeedItem } from "@/lib/social/types";
 import { FeedLoadWindow } from "../feed-load-window";
-import { MessageStepScroll } from "../message-step-scroll";
 import { MoongPartyFilter } from "../moong-party-filter";
 import { ScrollToBottom } from "../scroll-to-bottom";
 import { MoongFeedItem } from "./feed-item";
@@ -16,7 +15,6 @@ export function MoongFeedPage({ items }: { items: PublicMoongFeedItem[] }) {
   return (
     <main className="moong-page">
       <ScrollToBottom enabled={hasItems} />
-      <MessageStepScroll enabled={hasItems} />
       <MoongPartyFilter options={partyOptions} />
       <header className="moong-topbar">
         <Link aria-label="뭉" className="moong-brand" href="/">

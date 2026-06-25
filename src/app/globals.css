@@ -355,7 +355,7 @@ select {
 .moong-feed-shell {
   margin: 0 auto;
   max-width: 760px;
-  padding-top: 58px;
+  padding-top: 70px;
   touch-action: pan-y;
 }
 
@@ -369,85 +369,7 @@ select {
 }
 
 .moong-feed-window {
-  --moong-pull-distance: 0px;
-  --moong-pull-progress: 0;
   overflow-anchor: none;
-}
-
-.moong-pull-indicator {
-  align-items: center;
-  background: var(--surface);
-  border: 1px solid color-mix(in srgb, var(--muted) 18%, var(--line));
-  border-radius: 999px;
-  box-shadow: 0 8px 20px rgba(24, 32, 28, 0.09);
-  color: var(--muted);
-  display: inline-flex;
-  font-size: 11px;
-  font-weight: 720;
-  gap: 7px;
-  left: 50%;
-  line-height: 1;
-  min-height: 34px;
-  padding: 4px 11px 4px 6px;
-  pointer-events: none;
-  position: fixed;
-  top: 66px;
-  transform: translate(-50%, calc(-10px + (var(--moong-pull-progress) * 10px)));
-  transition:
-    background 160ms ease,
-    border-color 160ms ease,
-    color 160ms ease,
-    transform 180ms ease;
-  z-index: 35;
-}
-
-.moong-pull-indicator.is-ready,
-.moong-pull-indicator.is-loading {
-  background: var(--surface);
-  border-color: color-mix(in srgb, var(--muted) 36%, var(--line));
-  color: var(--ink-soft);
-}
-
-.moong-pull-mark {
-  align-items: center;
-  background: color-mix(in srgb, var(--muted) 11%, var(--surface));
-  border-radius: 999px;
-  color: var(--muted);
-  display: inline-flex;
-  flex: 0 0 24px;
-  height: 24px;
-  justify-content: center;
-  width: 24px;
-}
-
-.moong-pull-indicator.is-ready .moong-pull-mark,
-.moong-pull-indicator.is-loading .moong-pull-mark {
-  background: color-mix(in srgb, var(--muted) 15%, var(--surface));
-  color: var(--ink-soft);
-}
-
-.moong-pull-arrow {
-  display: block;
-  font-size: 15px;
-  line-height: 1;
-  transform: rotate(0deg);
-  transition: transform 160ms ease;
-}
-
-.moong-pull-indicator.is-ready .moong-pull-arrow,
-.moong-pull-button.is-ready .moong-pull-arrow {
-  transform: rotate(180deg);
-}
-
-.moong-pull-indicator.is-loading .moong-pull-arrow,
-.moong-pull-button.is-loading .moong-pull-arrow {
-  animation: pull-load-spin 700ms linear infinite;
-  border: 2px solid currentColor;
-  border-radius: 999px;
-  border-right-color: transparent;
-  font-size: 0;
-  height: 13px;
-  width: 13px;
 }
 
 .moong-pull-text {
@@ -455,9 +377,9 @@ select {
 }
 
 .moong-pull-loader {
-  display: none;
+  display: flex;
   justify-content: center;
-  margin: 0 0 8px;
+  margin: 0 0 18px;
 }
 
 .moong-pull-button {
@@ -472,19 +394,13 @@ select {
   display: inline-flex;
   font-size: 11px;
   font-weight: 700;
-  gap: 7px;
   line-height: 1;
   min-height: 34px;
-  padding: 4px 11px 4px 6px;
+  padding: 4px 14px;
   transition:
     box-shadow 160ms ease,
     filter 160ms ease,
     transform 160ms ease;
-}
-
-.moong-pull-button .moong-pull-mark {
-  background: color-mix(in srgb, var(--muted) 11%, var(--surface));
-  color: var(--muted);
 }
 
 .moong-pull-button:not(:disabled):hover {
@@ -510,41 +426,8 @@ select {
   cursor: default;
 }
 
-.moong-pull-button.is-loading .moong-pull-mark {
-  background: color-mix(in srgb, var(--muted) 15%, var(--surface));
-  color: var(--ink-soft);
-}
-
-.moong-pull-loader--done {
-  min-height: 30px;
-  opacity: 0.72;
-  padding-bottom: 8px;
-}
-
-.moong-pull-loader-done {
-  border: 1px solid rgba(23, 23, 22, 0.08);
-  border-radius: 999px;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 680;
-  line-height: 1;
-  padding: 7px 11px;
-}
-
 .moong-feed-item {
   display: block;
-}
-
-@keyframes pull-load-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .moong-pull-loader {
-    display: flex;
-  }
 }
 
 .moong-quote-group,
