@@ -77,7 +77,12 @@ function MoongFeedItem({ item }: { item: PublicMoongFeedItem }) {
 
 function MoongFeedRow({ item }: { item: PublicMoongPost }) {
   const displayTime = formatPostTime(item.postedAt);
-  const displayText = getTweetPreviewText(item.text);
+  const hasMedia = item.attachments.some(
+    (attachment) => attachment.url || attachment.previewImageUrl,
+  );
+  const displayText = getTweetPreviewText(item.text, {
+    hideTrailingShortUrls: hasMedia,
+  });
   const parentText = item.parentContext?.text
     ? getTweetPreviewText(item.parentContext.text)
     : null;
@@ -86,7 +91,12 @@ function MoongFeedRow({ item }: { item: PublicMoongPost }) {
     <article className="moong-row">
       <div className="moong-author">
         <span aria-hidden="true" className="moong-avatar">
-          {getAvatarLabel(item.authorName || item.authorUsername)}
+          {item.authorProfileImageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- profile URLs are stored runtime data
+            <img alt="" src={item.authorProfileImageUrl} />
+          ) : (
+            getAvatarLabel(item.authorName || item.authorUsername)
+          )}
         </span>
         <span className="moong-author-text">
           <span className="moong-author-name">{item.authorName}</span>
@@ -161,14 +171,27 @@ function OriginalPostCard({
   );
 }
 
-function getTweetPreviewText(value: string) {
-  const paragraphs = value
+function getTweetPreviewText(
+  value: string,
+  options: { hideTrailingShortUrls?: boolean } = {},
+) {
+  const normalized = options.hideTrailingShortUrls
+    ? removeTrailingShortUrls(value)
+    : value;
+  const paragraphs = normalized
     .replace(/\r\n/g, "\n")
     .split(/\n+/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean);
 
   return paragraphs.slice(0, 2).join("\n\n");
+}
+
+function removeTrailingShortUrls(value: string) {
+  return value.replace(
+    /(?:[ \t]*https:\/\/t\.co\/[A-Za-z0-9]+[ \t]*)+$/g,
+    "",
+  );
 }
 
 function PostAttachments({
@@ -181,7 +204,11 @@ function PostAttachments({
   const media = attachments.filter(
     (attachment) => attachment.url || attachment.previewImageUrl,
   );
-  const safeLinks = links.filter((link) => isSafeHttpUrl(link.expandedUrl));
+  const safeLinks = links.filter(
+    (link) =>
+      isSafeHttpUrl(link.expandedUrl) &&
+      !(media.length > 0 && isMediaAttachmentLink(link)),
+  );
 
   if (media.length === 0 && safeLinks.length === 0) {
     return null;
@@ -270,6 +297,31 @@ function getHost(value: string) {
   } catch {
     return value;
   }
+}
+
+function isMediaAttachmentLink(link: SocialPostLink) {
+  if (link.displayUrl?.startsWith("pic.x.com/")) {
+    return true;
+  }
+
+  const values = [link.expandedUrl, link.shortUrl].filter(
+    (value): value is string => Boolean(value),
+  );
+
+  return values.some((value) => {
+    try {
+      const url = new URL(value);
+      const host = url.hostname.replace(/^www\./, "");
+
+      return (
+        host === "t.co" ||
+        ((host === "x.com" || host === "twitter.com") &&
+          /\/status\/\d+\/(?:photo|video)\//.test(url.pathname))
+      );
+    } catch {
+      return false;
+    }
+  });
 }
 
 function isSafeHttpUrl(value: string) {

@@ -47,6 +47,7 @@ export type SocialPostLink = {
   displayUrl?: string | null;
   expandedUrl: string;
   images?: Array<{ height?: number; url: string; width?: number }>;
+  shortUrl?: string | null;
   title?: string | null;
 };
 
@@ -61,6 +62,7 @@ export type SocialPostContext = {
 export type PublicMoongPost = {
   attachments: SocialPostAttachment[];
   authorName: string;
+  authorProfileImageUrl: string | null;
   authorUsername: string;
   id: string;
   links: SocialPostLink[];

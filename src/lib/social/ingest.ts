@@ -9,6 +9,7 @@ import {
 import {
   createScanRun,
   finishScanRun,
+  getDisabledXSourceIdentities,
   getEnabledXSourcesForIngest,
   markUnfollowedXSources,
   markXSourceFailed,
@@ -32,6 +33,7 @@ export type SourceRefreshOptions = {
 export type SourceRefreshResult = {
   accountsSeen: number;
   dryRun: boolean;
+  excludedSkipped: number;
   fullyFetched: boolean;
   protectedSkipped: number;
   sourcesWritten: number;
@@ -87,7 +89,12 @@ export async function refreshXFollowingSources(
       maxAccounts,
       userId: targetAccount.id,
     });
-    const writableAccounts = following.accounts;
+    const disabledSources = await getDisabledXSourceIdentities({ supabase });
+    const writableAccounts = following.accounts.filter(
+      (account) =>
+        !disabledSources.platformUserIds.has(account.id) &&
+        !disabledSources.sourceKeys.has(account.username.toLowerCase()),
+    );
 
     if (!dryRun) {
       for (const account of writableAccounts) {
@@ -103,8 +110,9 @@ export async function refreshXFollowingSources(
     }
 
     const result = {
-      accountsSeen: writableAccounts.length,
+      accountsSeen: following.accounts.length,
       dryRun,
+      excludedSkipped: following.accounts.length - writableAccounts.length,
       fullyFetched: following.fullyFetched,
       protectedSkipped: writableAccounts.filter((account) => account.protected)
         .length,

@@ -71,6 +71,7 @@ export function getPostLinks(post: XPost): SocialPostLink[] {
       displayUrl: url.display_url ?? null,
       expandedUrl: url.expanded_url ?? url.unwound_url ?? url.url ?? "",
       images: url.images,
+      shortUrl: url.url ?? null,
       title: url.title ?? null,
     }))
     .filter((link) => isHttpUrl(link.expandedUrl));

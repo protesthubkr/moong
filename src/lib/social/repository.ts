@@ -67,7 +67,7 @@ const PUBLIC_POST_COLUMNS = [
 ].join(",");
 
 const PUBLIC_POST_SELECT_WITH_SOURCE =
-  `${PUBLIC_POST_COLUMNS},social_sources!inner(is_following,enabled,is_protected)`;
+  `${PUBLIC_POST_COLUMNS},social_sources!inner(is_following,enabled,is_protected,display_name,profile_image_url,source_key,username)`;
 
 export async function createScanRun({
   dryRun,
@@ -203,6 +203,36 @@ export async function markUnfollowedXSources({
   if (error) {
     throw new Error(error.message);
   }
+}
+
+export async function getDisabledXSourceIdentities({
+  supabase,
+}: {
+  supabase: SupabaseClient;
+}) {
+  const { data, error } = await supabase
+    .from("social_sources")
+    .select("platform_user_id,source_key,username")
+    .eq("platform", "x")
+    .eq("enabled", false);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return {
+    platformUserIds: new Set(
+      (data ?? [])
+        .map((source) => source.platform_user_id)
+        .filter((id): id is string => Boolean(id)),
+    ),
+    sourceKeys: new Set(
+      (data ?? [])
+        .flatMap((source) => [source.source_key, source.username])
+        .map((key) => key?.replace(/^@/, "").toLowerCase())
+        .filter((key): key is string => Boolean(key)),
+    ),
+  };
 }
 
 export async function getEnabledXSourcesForIngest({
@@ -490,8 +520,13 @@ export async function getPublicMoongFeed({
     quotedPlatformPostIds,
     supabase,
   });
+  const disabledSources = await getDisabledXSourceIdentities({ supabase });
 
-  return buildPublicFeedItems({ promotedRows, quoteRows });
+  return buildPublicFeedItems({
+    disabledSourceKeys: disabledSources.sourceKeys,
+    promotedRows,
+    quoteRows,
+  });
 }
 
 async function getQuoteSiblingRows({
@@ -525,9 +560,11 @@ async function getQuoteSiblingRows({
 }
 
 function buildPublicFeedItems({
+  disabledSourceKeys,
   promotedRows,
   quoteRows,
 }: {
+  disabledSourceKeys: Set<string>;
   promotedRows: SocialPostRow[];
   quoteRows: SocialPostRow[];
 }): PublicMoongFeedItem[] {
@@ -573,14 +610,19 @@ function buildPublicFeedItems({
     postsById.set(post.id, post);
 
     const posts = Array.from(postsById.values()).sort(comparePublicPostTime);
+    const original = getQuoteGroupOriginal({
+      posts,
+      quotedPlatformPostId: post.quotedPlatformPostId,
+    });
+
+    if (isDisabledSourceContext(original, disabledSourceKeys)) {
+      continue;
+    }
 
     items.push({
       id: `quote:${post.quotedPlatformPostId}`,
       kind: "quote_group",
-      original: getQuoteGroupOriginal({
-        posts,
-        quotedPlatformPostId: post.quotedPlatformPostId,
-      }),
+      original,
       posts,
       promotedAt: post.promotedAt,
       quotedPlatformPostId: post.quotedPlatformPostId,
@@ -618,6 +660,40 @@ function comparePublicPostTime(a: PublicMoongPost, b: PublicMoongPost) {
   }
 
   return a.id.localeCompare(b.id);
+}
+
+function isDisabledSourceContext(
+  context: SocialPostContext | null,
+  disabledSourceKeys: Set<string>,
+) {
+  if (!context) {
+    return false;
+  }
+
+  const keys = [context.authorUsername, getXUsernameFromUrl(context.sourceUrl)]
+    .map((key) => key?.replace(/^@/, "").toLowerCase())
+    .filter((key): key is string => Boolean(key) && key !== "i");
+
+  return keys.some((key) => disabledSourceKeys.has(key));
+}
+
+function getXUsernameFromUrl(value: string | null | undefined) {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    const url = new URL(value);
+    const host = url.hostname.replace(/^www\./, "");
+
+    if (host !== "x.com" && host !== "twitter.com") {
+      return null;
+    }
+
+    return url.pathname.split("/").filter(Boolean)[0] ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export async function getOpsData({ supabase }: { supabase: SupabaseClient | null }) {
@@ -927,13 +1003,27 @@ type SocialPostRow = {
   quote_context?: unknown;
   quoted_platform_post_id?: string | null;
   source_url: string;
+  social_sources?: JoinedSocialSourceRow | JoinedSocialSourceRow[] | null;
   text_snapshot: string;
 };
 
+type JoinedSocialSourceRow = {
+  display_name?: string | null;
+  profile_image_url?: string | null;
+  source_key?: string | null;
+  username?: string | null;
+};
+
 function mapPublicPostRow(row: SocialPostRow): PublicMoongPost {
+  const source = getJoinedSocialSource(row.social_sources);
+
   return {
     attachments: Array.isArray(row.attachments) ? row.attachments : [],
-    authorName: row.author_name,
+    authorName:
+      getSourceDisplayNameOverride(source) ??
+      source?.display_name ??
+      row.author_name,
+    authorProfileImageUrl: source?.profile_image_url ?? null,
     authorUsername: row.author_username,
     id: row.id,
     links: Array.isArray(row.links) ? row.links : [],
@@ -950,6 +1040,69 @@ function mapPublicPostRow(row: SocialPostRow): PublicMoongPost {
     sourceUrl: row.source_url,
     text: row.text_snapshot,
   };
+}
+
+function getJoinedSocialSource(
+  source: SocialPostRow["social_sources"],
+): JoinedSocialSourceRow | null {
+  if (Array.isArray(source)) {
+    return source[0] ?? null;
+  }
+
+  return source ?? null;
+}
+
+function getSourceDisplayNameOverride(source: JoinedSocialSourceRow | null) {
+  if (!source) {
+    return null;
+  }
+
+  const overrides = getSourceDisplayNameOverrides();
+  const keys = [source.source_key, source.username]
+    .map((key) => key?.replace(/^@/, "").toLowerCase())
+    .filter((key): key is string => Boolean(key));
+
+  for (const key of keys) {
+    const value = overrides.get(key);
+
+    if (value) {
+      return value;
+    }
+  }
+
+  return null;
+}
+
+let sourceDisplayNameOverrides: Map<string, string> | null = null;
+
+function getSourceDisplayNameOverrides() {
+  if (sourceDisplayNameOverrides) {
+    return sourceDisplayNameOverrides;
+  }
+
+  sourceDisplayNameOverrides = new Map();
+  const raw = process.env.MOONG_SOURCE_DISPLAY_NAMES?.trim();
+
+  if (!raw) {
+    return sourceDisplayNameOverrides;
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+
+    for (const [key, value] of Object.entries(parsed)) {
+      if (typeof value === "string" && value.trim()) {
+        sourceDisplayNameOverrides.set(
+          key.replace(/^@/, "").toLowerCase(),
+          value.trim(),
+        );
+      }
+    }
+  } catch {
+    sourceDisplayNameOverrides = new Map();
+  }
+
+  return sourceDisplayNameOverrides;
 }
 
 async function getOpsSources(supabase: SupabaseClient) {

@@ -30,6 +30,7 @@ npm run dev
 
 - `X_BEARER_TOKEN`
 - `MOONG_X_FOLLOWING_USERNAME=wordybirdbird`
+- `MOONG_SOURCE_DISPLAY_NAMES={}`
 - `MOONG_SOCIAL_POST_START_DATE=2026-05-01`
 - `MOONG_LIKE_THRESHOLD=150`
 - `MOONG_METRIC_REFRESH_WINDOW_HOURS=168`
@@ -39,6 +40,8 @@ npm run dev
 - `MOONG_SCORE_QUOTE_WEIGHT=2`
 
 `MOONG_LIKE_THRESHOLD`는 공개 승격 기준입니다. 점수 공식은 내부 랭킹에만 쓰입니다.
+
+`MOONG_SOURCE_DISPLAY_NAMES`는 source handle별 공개 표시명을 지정하는 JSON입니다. 예: `{"wordybirdbird":"워디버드"}`
 
 ```text
 score = like_count * MOONG_SCORE_LIKE_WEIGHT
