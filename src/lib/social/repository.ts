@@ -9,6 +9,7 @@ import {
   type PublicFeedCharacterDecisionRow,
 } from "./public-feed-policy";
 import { mapXMetrics } from "./scoring";
+import { getSocialSourcePartyInfo } from "./source-colors";
 import type {
   OpsRankingPost,
   OpsSocialSource,
@@ -66,6 +67,8 @@ const PUBLIC_POST_COLUMNS = [
   "text_snapshot",
   "posted_at",
   "post_type",
+  "conversation_id",
+  "reply_to_platform_post_id",
   "parent_context",
   "quote_context",
   "quoted_platform_post_id",
@@ -74,8 +77,19 @@ const PUBLIC_POST_COLUMNS = [
   "promoted_at",
 ].join(",");
 
+const PUBLIC_POST_SOURCE_SELECT =
+  "social_sources!inner(is_following,enabled,is_protected,display_name,profile_image_url,source_key,username)";
+
+const PUBLIC_POST_CHARACTER_SELECT =
+  "social_post_character_decisions!inner(classifier_version,primary_character,secondary_characters)";
+
+const PUBLIC_POST_METRIC_SELECT = "social_post_metrics(score,like_count)";
+
 const PUBLIC_POST_SELECT_WITH_SOURCE =
-  `${PUBLIC_POST_COLUMNS},social_sources!inner(is_following,enabled,is_protected,display_name,profile_image_url,source_key,username),social_post_character_decisions!inner(classifier_version,primary_character,secondary_characters)`;
+  `${PUBLIC_POST_COLUMNS},${PUBLIC_POST_METRIC_SELECT},${PUBLIC_POST_SOURCE_SELECT},${PUBLIC_POST_CHARACTER_SELECT}`;
+
+const PUBLIC_POST_SELECT_WITH_SOURCE_ONLY =
+  `${PUBLIC_POST_COLUMNS},${PUBLIC_POST_METRIC_SELECT},${PUBLIC_POST_SOURCE_SELECT}`;
 
 export async function createScanRun({
   dryRun,
@@ -507,27 +521,42 @@ export async function getPublicMoongFeed({
   }
 
   const feedWindowLimit = Math.min(Math.max(limit * 8, limit), 1000);
+  const rankedPostRows = await getPublicFeedRankedPostRows({
+    limit: feedWindowLimit,
+    sourceKeys: publicSourceKeys,
+    supabase,
+  });
+  const rankedPostIds = rankedPostRows.map((row) => row.post_id);
+
+  if (rankedPostIds.length === 0) {
+    return [];
+  }
+
   const { data, error } = await supabase
     .from("social_posts")
     .select(PUBLIC_POST_SELECT_WITH_SOURCE)
+    .in("id", rankedPostIds)
     .eq("visibility_status", "promoted")
     .in("source_key", publicSourceKeys)
     .eq("social_sources.is_protected", false)
     .eq(
       "social_post_character_decisions.classifier_version",
       SOCIAL_POST_CHARACTER_CLASSIFIER_VERSION,
-    )
-    .order("posted_at", { ascending: false, nullsFirst: false })
-    .order("promoted_at", { ascending: false, nullsFirst: false })
-    .limit(feedWindowLimit);
+    );
 
   if (error) {
     throw new Error(error.message);
   }
 
-  const promotedRows = ((data ?? []) as unknown as SocialPostRow[]).filter(
-    passesPublicFeedCharacterPolicy,
+  const rowsById = new Map(
+    ((data ?? []) as unknown as SocialPostRow[]).map((row) => [row.id, row]),
   );
+  const promotedRows = rankedPostRows
+    .map((rankedRow) =>
+      mergeRankedPublicPostRow(rowsById.get(rankedRow.post_id), rankedRow),
+    )
+    .filter((row): row is SocialPostRow => Boolean(row))
+    .filter(passesPublicFeedPolicy);
   const quotedPlatformPostIds = Array.from(
     new Set(
       promotedRows
@@ -538,6 +567,17 @@ export async function getPublicMoongFeed({
   );
   const quoteRows = await getQuoteSiblingRows({
     quotedPlatformPostIds,
+    sourceKeys: publicSourceKeys,
+    supabase,
+  });
+  const threadRows = await getThreadSiblingRows({
+    conversationIds: Array.from(
+      new Set(
+        promotedRows
+          .map((row) => row.conversation_id)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    ),
     sourceKeys: publicSourceKeys,
     supabase,
   });
@@ -552,9 +592,34 @@ export async function getPublicMoongFeed({
     disabledSourceKeys,
     promotedRows,
     quoteRows,
+    threadRows,
   })
-    .sort(comparePublicFeedItemTime)
+    .sort(comparePublicFeedItemScore)
     .slice(-limit);
+}
+
+async function getPublicFeedRankedPostRows({
+  limit,
+  sourceKeys,
+  supabase,
+}: {
+  limit: number;
+  sourceKeys: string[];
+  supabase: SupabaseClient;
+}) {
+  const { data, error } = await supabase.rpc("get_public_moong_ranked_post_ids", {
+    p_classifier_version: SOCIAL_POST_CHARACTER_CLASSIFIER_VERSION,
+    p_limit: limit,
+    p_source_keys: sourceKeys,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return ((data ?? []) as PublicFeedRankedPostRpcRow[]).filter(
+    isPublicFeedRankedPostRow,
+  );
 }
 
 async function getQuoteSiblingRows({
@@ -590,20 +655,53 @@ async function getQuoteSiblingRows({
   }
 
   return ((data ?? []) as unknown as SocialPostRow[]).filter(
-    passesPublicFeedCharacterPolicy,
+    passesPublicFeedPolicy,
   );
+}
+
+async function getThreadSiblingRows({
+  conversationIds,
+  sourceKeys,
+  supabase,
+}: {
+  conversationIds: string[];
+  sourceKeys: string[];
+  supabase: SupabaseClient;
+}) {
+  if (conversationIds.length === 0 || sourceKeys.length === 0) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from("social_posts")
+    .select(PUBLIC_POST_SELECT_WITH_SOURCE_ONLY)
+    .eq("platform", "x")
+    .neq("visibility_status", "skipped")
+    .in("source_key", sourceKeys)
+    .eq("social_sources.is_protected", false)
+    .in("conversation_id", conversationIds)
+    .order("posted_at", { ascending: true, nullsFirst: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? []) as unknown as SocialPostRow[];
 }
 
 function buildPublicFeedItems({
   disabledSourceKeys,
   promotedRows,
   quoteRows,
+  threadRows,
 }: {
   disabledSourceKeys: Set<string>;
   promotedRows: SocialPostRow[];
   quoteRows: SocialPostRow[];
+  threadRows: SocialPostRow[];
 }): PublicMoongFeedItem[] {
   const quotePostsByOriginalId = new Map<string, PublicMoongPost[]>();
+  const threadPostsByKey = getThreadPostsByKey([...threadRows, ...promotedRows]);
 
   for (const row of quoteRows) {
     if (!row.quoted_platform_post_id) {
@@ -616,10 +714,41 @@ function buildPublicFeedItems({
   }
 
   const seenQuotedOriginalIds = new Set<string>();
+  const seenThreadKeys = new Set<string>();
+  const seenThreadPostIds = new Set<string>();
   const items: PublicMoongFeedItem[] = [];
 
   for (const row of promotedRows) {
     const post = mapPublicPostRow(row);
+    const threadKey = getThreadKey(row);
+    const threadPosts = threadKey ? threadPostsByKey.get(threadKey) : null;
+
+    if (
+      threadKey &&
+      threadPosts &&
+      threadPosts.length > 1 &&
+      threadPosts.some((threadPost) => threadPost.id === post.id)
+    ) {
+      if (!seenThreadKeys.has(threadKey)) {
+        seenThreadKeys.add(threadKey);
+        threadPosts.forEach((threadPost) => seenThreadPostIds.add(threadPost.id));
+        items.push({
+          id: `thread:${threadKey}`,
+          kind: "thread",
+          posts: threadPosts,
+          promotedAt: getLatestPromotedAt(threadPosts),
+          rankingScore: getPublicPostGroupRankingScore(threadPosts),
+          score: getPublicPostGroupScore(threadPosts),
+          sincerityScore: getPublicPostGroupSincerityScore(threadPosts),
+        });
+      }
+
+      continue;
+    }
+
+    if (seenThreadPostIds.has(post.id)) {
+      continue;
+    }
 
     if (post.postType !== "quote" || !post.quotedPlatformPostId) {
       items.push({
@@ -627,6 +756,9 @@ function buildPublicFeedItems({
         kind: "post",
         post,
         promotedAt: post.promotedAt,
+        rankingScore: post.rankingScore,
+        score: post.score,
+        sincerityScore: post.sincerityScore,
       });
       continue;
     }
@@ -661,10 +793,125 @@ function buildPublicFeedItems({
       posts,
       promotedAt: post.promotedAt,
       quotedPlatformPostId: post.quotedPlatformPostId,
+      rankingScore: getPublicPostGroupRankingScore(posts),
+      score: getPublicPostGroupScore(posts),
+      sincerityScore: getPublicPostGroupSincerityScore(posts),
     });
   }
 
   return items;
+}
+
+function getThreadPostsByKey(rows: SocialPostRow[]) {
+  const rowsByKey = new Map<string, Map<string, SocialPostRow>>();
+
+  for (const row of rows) {
+    const key = getThreadKey(row);
+
+    if (!key) {
+      continue;
+    }
+
+    const posts = rowsByKey.get(key) ?? new Map<string, SocialPostRow>();
+    const existing = posts.get(row.platform_post_id);
+
+    if (
+      !existing ||
+      readFiniteNumber(row.ranking_score, 0) >
+        readFiniteNumber(existing.ranking_score, 0)
+    ) {
+      posts.set(row.platform_post_id, row);
+    }
+
+    rowsByKey.set(key, posts);
+  }
+
+  const postsByKey = new Map<string, PublicMoongPost[]>();
+
+  for (const [key, groupedRows] of rowsByKey.entries()) {
+    const posts = getSelfThreadRows(Array.from(groupedRows.values())).map(
+      mapPublicPostRow,
+    );
+
+    if (posts.length > 1) {
+      postsByKey.set(key, posts);
+    }
+  }
+
+  return postsByKey;
+}
+
+function getSelfThreadRows(rows: SocialPostRow[]) {
+  const sortedRows = [...rows].sort(compareSocialPostRowTime);
+  const rowsByPlatformPostId = new Map(
+    sortedRows.map((row) => [row.platform_post_id, row]),
+  );
+  const conversationId = sortedRows[0]?.conversation_id;
+  const root = conversationId ? rowsByPlatformPostId.get(conversationId) : null;
+
+  if (!root) {
+    return [];
+  }
+
+  const includedIds = new Set([root.platform_post_id]);
+  let changed = true;
+
+  while (changed) {
+    changed = false;
+
+    for (const row of sortedRows) {
+      if (includedIds.has(row.platform_post_id)) {
+        continue;
+      }
+
+      if (
+        row.reply_to_platform_post_id &&
+        includedIds.has(row.reply_to_platform_post_id)
+      ) {
+        includedIds.add(row.platform_post_id);
+        changed = true;
+      }
+    }
+  }
+
+  return sortedRows.filter((row) => includedIds.has(row.platform_post_id));
+}
+
+function getThreadKey(row: Pick<SocialPostRow, "author_username" | "conversation_id">) {
+  if (!row.conversation_id) {
+    return null;
+  }
+
+  return `${row.conversation_id}:${row.author_username.replace(/^@/, "").toLowerCase()}`;
+}
+
+function compareSocialPostRowTime(a: SocialPostRow, b: SocialPostRow) {
+  const aTime = a.posted_at ? Date.parse(a.posted_at) : Number.POSITIVE_INFINITY;
+  const bTime = b.posted_at ? Date.parse(b.posted_at) : Number.POSITIVE_INFINITY;
+
+  if (aTime !== bTime) {
+    return aTime - bTime;
+  }
+
+  const platformPostIdComparison = comparePlatformPostIds(
+    a.platform_post_id,
+    b.platform_post_id,
+  );
+
+  if (platformPostIdComparison !== 0) {
+    return platformPostIdComparison;
+  }
+
+  return a.id.localeCompare(b.id);
+}
+
+function getLatestPromotedAt(posts: PublicMoongPost[]) {
+  const promotedTimes = posts
+    .map((post) => post.promotedAt)
+    .filter((time): time is string => Boolean(time))
+    .sort((a, b) => Date.parse(b) - Date.parse(a));
+
+  return promotedTimes[0] ?? null;
 }
 
 function getQuoteGroupOriginal({
@@ -694,7 +941,35 @@ function comparePublicPostTime(a: PublicMoongPost, b: PublicMoongPost) {
     return aTime - bTime;
   }
 
+  const platformPostIdComparison = comparePlatformPostIds(
+    a.platformPostId,
+    b.platformPostId,
+  );
+
+  if (platformPostIdComparison !== 0) {
+    return platformPostIdComparison;
+  }
+
   return a.id.localeCompare(b.id);
+}
+
+function comparePlatformPostIds(a: string, b: string) {
+  if (/^\d+$/.test(a) && /^\d+$/.test(b)) {
+    const aValue = BigInt(a);
+    const bValue = BigInt(b);
+
+    if (aValue < bValue) {
+      return -1;
+    }
+
+    if (aValue > bValue) {
+      return 1;
+    }
+
+    return 0;
+  }
+
+  return a.localeCompare(b);
 }
 
 function comparePublicFeedItemTime(a: PublicMoongFeedItem, b: PublicMoongFeedItem) {
@@ -708,9 +983,34 @@ function comparePublicFeedItemTime(a: PublicMoongFeedItem, b: PublicMoongFeedIte
   return a.id.localeCompare(b.id);
 }
 
+function comparePublicFeedItemScore(a: PublicMoongFeedItem, b: PublicMoongFeedItem) {
+  const rankingScoreDifference = a.rankingScore - b.rankingScore;
+
+  if (rankingScoreDifference !== 0) {
+    return rankingScoreDifference;
+  }
+
+  const scoreDifference = a.score - b.score;
+
+  if (scoreDifference !== 0) {
+    return scoreDifference;
+  }
+
+  return comparePublicFeedItemTime(a, b);
+}
+
 function getPublicFeedItemTime(item: PublicMoongFeedItem) {
   if (item.kind === "post") {
     return parseFeedTime(item.post.postedAt ?? item.promotedAt);
+  }
+
+  if (item.kind === "thread") {
+    const postTimes = item.posts.map((post) => parseFeedTime(post.postedAt));
+    const latestPostTime = Math.max(...postTimes);
+
+    return Number.isFinite(latestPostTime)
+      ? latestPostTime
+      : parseFeedTime(item.promotedAt);
   }
 
   const postTimes = item.posts.map((post) => parseFeedTime(post.postedAt));
@@ -1065,6 +1365,7 @@ type SocialPostRow = {
   attachments: unknown;
   author_name: string;
   author_username: string;
+  conversation_id: string | null;
   id: string;
   links: unknown;
   parent_context: unknown;
@@ -1075,38 +1376,84 @@ type SocialPostRow = {
   promoted_at: string | null;
   quote_context?: unknown;
   quoted_platform_post_id?: string | null;
+  ranking_score?: number | string | null;
+  reply_to_platform_post_id: string | null;
+  sincerity_score?: number | string | null;
   source_url: string;
   social_post_character_decisions?:
     | PublicFeedCharacterDecisionRow
     | PublicFeedCharacterDecisionRow[]
     | null;
+  social_post_metrics?: JoinedSocialPostMetricRow | JoinedSocialPostMetricRow[] | null;
   social_sources?: JoinedSocialSourceRow | JoinedSocialSourceRow[] | null;
   text_snapshot: string;
 };
 
 type JoinedSocialSourceRow = {
   display_name?: string | null;
+  enabled?: boolean | null;
+  is_following?: boolean | null;
+  is_protected?: boolean | null;
   profile_image_url?: string | null;
   source_key?: string | null;
   username?: string | null;
 };
 
+type JoinedSocialPostMetricRow = {
+  like_count?: number | null;
+  score?: number | string | null;
+};
+
+type PublicFeedRankedPostRpcRow = {
+  engagement_score?: number | string | null;
+  like_count?: number | null;
+  post_id?: string | null;
+  ranking_score?: number | string | null;
+  sincerity_score?: number | string | null;
+};
+
+type PublicFeedRankedPostRow = PublicFeedRankedPostRpcRow & {
+  post_id: string;
+};
+
+function isPublicFeedRankedPostRow(
+  row: PublicFeedRankedPostRpcRow,
+): row is PublicFeedRankedPostRow {
+  return typeof row.post_id === "string" && row.post_id.length > 0;
+}
+
 function mapPublicPostRow(row: SocialPostRow): PublicMoongPost {
   const source = getJoinedSocialSource(row.social_sources);
+  const authorName =
+    getSourceDisplayNameOverride(source) ??
+    source?.display_name ??
+    row.author_name;
+  const sourceKey = source?.source_key ?? row.author_username;
+  const partyInfo = getSocialSourcePartyInfo({
+    displayName: authorName,
+    sourceKey,
+    sourceUrl: row.source_url,
+    username: source?.username ?? row.author_username,
+  });
+  const score = getPublicPostScore(row);
+  const sincerityScore = getPublicPostSincerityScore(row);
+  const rankingScore = getPublicPostRankingScore(row, sincerityScore);
 
   return {
     attachments: Array.isArray(row.attachments) ? row.attachments : [],
-    authorName:
-      getSourceDisplayNameOverride(source) ??
-      source?.display_name ??
-      row.author_name,
+    authorName,
     authorProfileImageUrl: source?.profile_image_url ?? null,
     authorUsername: row.author_username,
+    conversationId: row.conversation_id ?? null,
     id: row.id,
     links: Array.isArray(row.links) ? row.links : [],
     parentContext: isObject(row.parent_context)
       ? row.parent_context
       : null,
+    partyAccentColor: partyInfo.accentColor,
+    partyKey: partyInfo.key,
+    partyLabel: partyInfo.label,
+    partyLogoSrc: partyInfo.logoSrc,
     platform: row.platform,
     platformPostId: row.platform_post_id,
     postType: row.post_type,
@@ -1114,10 +1461,66 @@ function mapPublicPostRow(row: SocialPostRow): PublicMoongPost {
     promotedAt: row.promoted_at,
     quotedPlatformPostId: row.quoted_platform_post_id ?? null,
     quoteContext: isObject(row.quote_context) ? row.quote_context : null,
-    sourceKey: source?.source_key ?? row.author_username,
+    replyToPlatformPostId: row.reply_to_platform_post_id ?? null,
+    rankingScore,
+    score,
+    sincerityScore,
+    sourceKey,
     sourceUrl: row.source_url,
     text: row.text_snapshot,
   };
+}
+
+function mergeRankedPublicPostRow(
+  row: SocialPostRow | undefined,
+  rankedRow: PublicFeedRankedPostRow,
+): SocialPostRow | null {
+  if (!row) {
+    return null;
+  }
+
+  return {
+    ...row,
+    ranking_score: rankedRow.ranking_score ?? null,
+    sincerity_score: rankedRow.sincerity_score ?? null,
+    social_post_metrics: {
+      like_count: rankedRow.like_count ?? null,
+      score: rankedRow.engagement_score ?? null,
+    },
+  };
+}
+
+function getPublicPostGroupScore(posts: PublicMoongPost[]) {
+  return Math.max(0, ...posts.map((post) => post.score));
+}
+
+function getPublicPostGroupRankingScore(posts: PublicMoongPost[]) {
+  return Math.max(0, ...posts.map((post) => post.rankingScore));
+}
+
+function getPublicPostGroupSincerityScore(posts: PublicMoongPost[]) {
+  return Math.max(0, ...posts.map((post) => post.sincerityScore));
+}
+
+function getPublicPostScore(row: SocialPostRow) {
+  const metric = getJoinedSocialPostMetric(row.social_post_metrics);
+  const score = Number(metric?.score ?? 0);
+
+  return Number.isFinite(score) ? score : 0;
+}
+
+function getPublicPostRankingScore(row: SocialPostRow, fallback: number) {
+  return readFiniteNumber(row.ranking_score, fallback);
+}
+
+function getPublicPostSincerityScore(row: SocialPostRow) {
+  return readFiniteNumber(row.sincerity_score, 0);
+}
+
+function readFiniteNumber(value: number | string | null | undefined, fallback: number) {
+  const numberValue = Number(value);
+
+  return Number.isFinite(numberValue) ? numberValue : fallback;
 }
 
 function getJoinedSocialSource(
@@ -1130,7 +1533,21 @@ function getJoinedSocialSource(
   return source ?? null;
 }
 
-function passesPublicFeedCharacterPolicy(row: SocialPostRow) {
+function getJoinedSocialPostMetric(
+  metric: SocialPostRow["social_post_metrics"],
+): JoinedSocialPostMetricRow | null {
+  if (Array.isArray(metric)) {
+    return metric[0] ?? null;
+  }
+
+  return metric ?? null;
+}
+
+function passesPublicFeedPolicy(row: SocialPostRow) {
+  if (getJoinedSocialSource(row.social_sources)?.is_protected) {
+    return false;
+  }
+
   return shouldExposeByPublicFeedCharacterPolicy(
     getJoinedCharacterDecision(row.social_post_character_decisions),
   );

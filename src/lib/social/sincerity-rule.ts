@@ -26,11 +26,23 @@ const SINCERITY_BOOSTING_SECONDARY_CHARACTERS = new Set<SocialPostCharacter>([
   "policy_explainer",
 ]);
 
+const PROMOTIONAL_SINCERITY_ANCHOR_SECONDARY_CHARACTERS =
+  new Set<SocialPostCharacter>([
+    "emotional_essay",
+    "field_note",
+    "gratitude_reflection",
+    "memorial_note",
+  ]);
+
 export type SocialSincerityRuleDecision = {
   passes: boolean;
   reason:
     | "always_pass_primary"
     | "conditional_primary_with_boosting_secondary"
+    | "excluded_campaign_militant_pair"
+    | "excluded_flat_promotional_resource"
+    | "excluded_militant_argument_pair"
+    | "excluded_militant_quote_pair"
     | "excluded_by_rule";
   ruleVersion: typeof SOCIAL_SINCERITY_RULE_VERSION;
 };
@@ -42,6 +54,55 @@ export function getRecommendedSincerityRuleDecision({
   primaryCharacter: string;
   secondaryCharacters: string[];
 }): SocialSincerityRuleDecision {
+  if (
+    primaryCharacter === "militant_declaration" &&
+    secondaryCharacters.includes("argument_reply")
+  ) {
+    return {
+      passes: false,
+      reason: "excluded_militant_argument_pair",
+      ruleVersion: SOCIAL_SINCERITY_RULE_VERSION,
+    };
+  }
+
+  if (
+    primaryCharacter === "militant_declaration" &&
+    secondaryCharacters.includes("quote_commentary")
+  ) {
+    return {
+      passes: false,
+      reason: "excluded_militant_quote_pair",
+      ruleVersion: SOCIAL_SINCERITY_RULE_VERSION,
+    };
+  }
+
+  if (
+    primaryCharacter === "campaign_mobilization" &&
+    secondaryCharacters.includes("militant_declaration")
+  ) {
+    return {
+      passes: false,
+      reason: "excluded_campaign_militant_pair",
+      ruleVersion: SOCIAL_SINCERITY_RULE_VERSION,
+    };
+  }
+
+  if (
+    primaryCharacter === "policy_explainer" &&
+    secondaryCharacters.includes("notice_or_resource") &&
+    !secondaryCharacters.some(
+      (character) =>
+        isSocialPostCharacter(character) &&
+        PROMOTIONAL_SINCERITY_ANCHOR_SECONDARY_CHARACTERS.has(character),
+    )
+  ) {
+    return {
+      passes: false,
+      reason: "excluded_flat_promotional_resource",
+      ruleVersion: SOCIAL_SINCERITY_RULE_VERSION,
+    };
+  }
+
   if (isSocialPostCharacter(primaryCharacter)) {
     if (ALWAYS_PASS_PRIMARY_CHARACTERS.has(primaryCharacter)) {
       return {

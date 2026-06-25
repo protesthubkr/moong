@@ -67,9 +67,7 @@ export function ClampedText({
       ref={textRef}
     >
       {text}
-      <span aria-hidden="true" className="moong-clamped-text-ellipsis">
-        ...
-      </span>
+      <span aria-hidden="true" className="moong-clamped-text-fade" />
     </span>
   );
 }

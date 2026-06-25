@@ -72,9 +72,14 @@ export type PublicMoongPost = {
   authorName: string;
   authorProfileImageUrl: string | null;
   authorUsername: string;
+  conversationId: string | null;
   id: string;
   links: SocialPostLink[];
   parentContext: SocialPostContext | null;
+  partyAccentColor: string;
+  partyKey: string;
+  partyLabel: string;
+  partyLogoSrc: string | null;
   platform: SocialPlatform;
   platformPostId: string;
   postType: string;
@@ -82,6 +87,10 @@ export type PublicMoongPost = {
   promotedAt: string | null;
   quotedPlatformPostId: string | null;
   quoteContext: SocialPostContext | null;
+  replyToPlatformPostId: string | null;
+  rankingScore: number;
+  score: number;
+  sincerityScore: number;
   sourceKey: string;
   sourceUrl: string;
   text: string;
@@ -93,6 +102,9 @@ export type PublicMoongFeedItem =
       kind: "post";
       post: PublicMoongPost;
       promotedAt: string | null;
+      rankingScore: number;
+      score: number;
+      sincerityScore: number;
     }
   | {
       id: string;
@@ -101,6 +113,18 @@ export type PublicMoongFeedItem =
       posts: PublicMoongPost[];
       promotedAt: string | null;
       quotedPlatformPostId: string;
+      rankingScore: number;
+      score: number;
+      sincerityScore: number;
+    }
+  | {
+      id: string;
+      kind: "thread";
+      posts: PublicMoongPost[];
+      promotedAt: string | null;
+      rankingScore: number;
+      score: number;
+      sincerityScore: number;
     };
 
 export type OpsSocialSource = {

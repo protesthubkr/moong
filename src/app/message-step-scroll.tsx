@@ -3,8 +3,7 @@
 import { useEffect } from "react";
 
 const SCROLL_OFFSET = 64;
-const WHEEL_GESTURE_IDLE_MS = 140;
-const WHEEL_STEP_THRESHOLD = 26;
+const STEP_LOCK_MS = 320;
 const TOUCH_START_THRESHOLD = 7;
 const TOUCH_STEP_THRESHOLD = 18;
 const MAX_WHEEL_DELTA = 260;
@@ -16,10 +15,8 @@ export function MessageStepScroll({ enabled }: { enabled: boolean }) {
       return;
     }
 
-    let wheelAccumulator = 0;
-    let wheelDirection: -1 | 1 | null = null;
-    let wheelGestureTimer = 0;
-    let steppedThisGesture = false;
+    let stepLockTimer = 0;
+    let stepLocked = false;
     let touchGesture: {
       direction: -1 | 1 | null;
       lastY: number;
@@ -28,19 +25,13 @@ export function MessageStepScroll({ enabled }: { enabled: boolean }) {
       y: number;
     } | null = null;
 
-    const resetWheelGesture = () => {
-      wheelAccumulator = 0;
-      wheelDirection = null;
-      steppedThisGesture = false;
-      wheelGestureTimer = 0;
-    };
-
-    const scheduleWheelGestureReset = () => {
-      window.clearTimeout(wheelGestureTimer);
-      wheelGestureTimer = window.setTimeout(
-        resetWheelGesture,
-        WHEEL_GESTURE_IDLE_MS,
-      );
+    const lockStep = () => {
+      window.clearTimeout(stepLockTimer);
+      stepLocked = true;
+      stepLockTimer = window.setTimeout(() => {
+        stepLocked = false;
+        stepLockTimer = 0;
+      }, STEP_LOCK_MS);
     };
 
     const scrollToRow = (row: HTMLElement, behavior: ScrollBehavior) => {
@@ -55,63 +46,6 @@ export function MessageStepScroll({ enabled }: { enabled: boolean }) {
         left: 0,
         top: targetTop,
       });
-    };
-
-    const handleWheel = (event: WheelEvent) => {
-      if (shouldIgnoreWheel(event)) {
-        return;
-      }
-
-      const deltaY = getNormalizedWheelDelta(event);
-
-      if (deltaY === 0) {
-        return;
-      }
-
-      const direction = deltaY > 0 ? 1 : -1;
-      const rows = getMessageRows();
-      const activeRow = getActiveRow(rows);
-
-      if (!activeRow) {
-        return;
-      }
-
-      event.preventDefault();
-      scheduleWheelGestureReset();
-
-      if (wheelDirection !== direction) {
-        wheelAccumulator = 0;
-        wheelDirection = direction;
-        steppedThisGesture = false;
-      }
-
-      if (steppedThisGesture) {
-        return;
-      }
-
-      const bounds = getRowScrollBounds(activeRow);
-
-      if (canScrollWithinRow(bounds, direction)) {
-        wheelAccumulator = 0;
-        scrollWithinRow(bounds, deltaY);
-        return;
-      }
-
-      wheelAccumulator += deltaY;
-
-      if (Math.abs(wheelAccumulator) < WHEEL_STEP_THRESHOLD) {
-        return;
-      }
-
-      const target = getAdjacentRow(rows, activeRow, direction);
-
-      if (!target) {
-        return;
-      }
-
-      wheelAccumulator = 0;
-      steppedThisGesture = true;
-      scrollToRow(target, getSnapBehavior());
     };
 
     const handleTouchStart = (event: TouchEvent) => {
@@ -153,11 +87,10 @@ export function MessageStepScroll({ enabled }: { enabled: boolean }) {
       const deltaY = touchGesture.lastY - touch.clientY;
       const direction = totalY > 0 ? 1 : -1;
       const rows = getMessageRows();
-      const activeRow = getActiveRow(rows);
 
       touchGesture.lastY = touch.clientY;
 
-      if (!activeRow) {
+      if (rows.length === 0) {
         return;
       }
 
@@ -166,7 +99,25 @@ export function MessageStepScroll({ enabled }: { enabled: boolean }) {
         touchGesture.stepped = false;
       }
 
-      if (touchGesture.stepped) {
+      if (stepLocked || touchGesture.stepped) {
+        return;
+      }
+
+      const activeRow = getContainingRow(rows);
+
+      if (!activeRow) {
+        if (Math.abs(totalY) < TOUCH_STEP_THRESHOLD) {
+          return;
+        }
+
+        const target = getGapStepTargetRow(rows, direction);
+
+        if (target) {
+          touchGesture.stepped = true;
+          lockStep();
+          scrollToRow(target, getSnapBehavior());
+        }
+
         return;
       }
 
@@ -188,6 +139,7 @@ export function MessageStepScroll({ enabled }: { enabled: boolean }) {
       }
 
       touchGesture.stepped = true;
+      lockStep();
       scrollToRow(target, getSnapBehavior());
     };
 
@@ -215,10 +167,6 @@ export function MessageStepScroll({ enabled }: { enabled: boolean }) {
     };
 
     document.documentElement.dataset.moongStepScroll = "ready";
-    window.addEventListener("wheel", handleWheel, {
-      capture: true,
-      passive: false,
-    });
     window.addEventListener("touchstart", handleTouchStart, {
       capture: true,
       passive: true,
@@ -233,8 +181,7 @@ export function MessageStepScroll({ enabled }: { enabled: boolean }) {
 
     return () => {
       delete document.documentElement.dataset.moongStepScroll;
-      window.clearTimeout(wheelGestureTimer);
-      window.removeEventListener("wheel", handleWheel, true);
+      window.clearTimeout(stepLockTimer);
       window.removeEventListener("touchstart", handleTouchStart, true);
       window.removeEventListener("touchmove", handleTouchMove, true);
       window.removeEventListener("touchend", handleTouchEnd, true);
@@ -252,27 +199,40 @@ function getMessageRows() {
   );
 }
 
-function getActiveRow(rows: HTMLElement[]) {
+function getContainingRow(rows: HTMLElement[]) {
   if (rows.length === 0) {
     return null;
   }
 
   const anchorTop = window.scrollY + SCROLL_OFFSET + 1;
-  const containingRow = rows.find(
-    (row) =>
-      getRowDocumentTop(row) <= anchorTop &&
-      getRowDocumentBottom(row) > anchorTop,
+  return (
+    rows.find(
+      (row) =>
+        getRowDocumentTop(row) <= anchorTop &&
+        getRowDocumentBottom(row) > anchorTop,
+    ) ?? null
   );
+}
 
-  if (containingRow) {
-    return containingRow;
+function getGapStepTargetRow(rows: HTMLElement[], direction: -1 | 1) {
+  const anchorTop = window.scrollY + SCROLL_OFFSET + 1;
+
+  if (direction > 0) {
+    return (
+      rows.find(
+        (row) => getRowDocumentTop(row) >= anchorTop - ROW_BOUNDARY_EPSILON,
+      ) ??
+      null
+    );
   }
 
-  return (
-    rows.find((row) => getRowDocumentTop(row) > anchorTop) ??
-    rows[rows.length - 1] ??
-    null
-  );
+  for (let index = rows.length - 1; index >= 0; index -= 1) {
+    if (getRowDocumentBottom(rows[index]) <= anchorTop + ROW_BOUNDARY_EPSILON) {
+      return rows[index];
+    }
+  }
+
+  return null;
 }
 
 function getTargetRow(rows: HTMLElement[], direction: -1 | 1) {
@@ -368,17 +328,6 @@ function getSnapBehavior(): ScrollBehavior {
     : "smooth";
 }
 
-function getNormalizedWheelDelta(event: WheelEvent) {
-  const unit =
-    event.deltaMode === 1
-      ? 16
-      : event.deltaMode === 2
-        ? window.innerHeight
-        : 1;
-
-  return event.deltaY * unit;
-}
-
 function shouldIgnoreKey(event: KeyboardEvent) {
   return (
     event.altKey ||
@@ -386,18 +335,6 @@ function shouldIgnoreKey(event: KeyboardEvent) {
     event.metaKey ||
     shouldIgnoreTarget(event.target)
   );
-}
-
-function shouldIgnoreWheel(event: WheelEvent) {
-  if (event.ctrlKey || event.metaKey) {
-    return true;
-  }
-
-  if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
-    return true;
-  }
-
-  return shouldIgnoreWheelTarget(event.target);
 }
 
 function shouldIgnoreTarget(target: EventTarget | null) {
@@ -419,7 +356,7 @@ function shouldIgnoreTarget(target: EventTarget | null) {
   );
 }
 
-function shouldIgnoreWheelTarget(target: EventTarget | null) {
+function shouldIgnoreTouchTarget(target: EventTarget | null) {
   if (!(target instanceof Element)) {
     return false;
   }
@@ -435,10 +372,6 @@ function shouldIgnoreWheelTarget(target: EventTarget | null) {
       ].join(","),
     ),
   );
-}
-
-function shouldIgnoreTouchTarget(target: EventTarget | null) {
-  return shouldIgnoreWheelTarget(target);
 }
 
 function getKeyDirection(event: KeyboardEvent): -1 | 1 | null {

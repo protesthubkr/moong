@@ -15,6 +15,13 @@ export type SocialSourceColorStyle = {
   "--party-soft": string;
 };
 
+export type SocialSourcePartyInfo = {
+  accentColor: string;
+  key: string;
+  label: string;
+  logoSrc: string | null;
+};
+
 type SocialColorPalette = SocialSourceColorStyle & {
   key: string;
 };
@@ -189,25 +196,123 @@ const DEFAULT_SOURCE_COLOR_KEYS: Record<string, string> = {
   yoeman6310: "minjoo",
 };
 
-export function getPostColorStyle(post: PublicMoongPost) {
-  return getSocialSourceColorStyle({
-    displayName: post.authorName,
-    sourceKey: post.sourceKey,
-    sourceUrl: post.sourceUrl,
-    username: post.authorUsername,
-  });
+const PARTY_META: Record<
+  string,
+  {
+    label: string;
+    logoSrc: string | null;
+  }
+> = {
+  chokuk: {
+    label: "조국혁신당",
+    logoSrc: null,
+  },
+  climateall: {
+    label: "기후민생당",
+    logoSrc: null,
+  },
+  feminist: {
+    label: "여성/페미니즘",
+    logoSrc: null,
+  },
+  green: {
+    label: "녹색당",
+    logoSrc: "/green-logo.webp",
+  },
+  jinbo: {
+    label: "진보당",
+    logoSrc: "/jinbo-logo.svg",
+  },
+  justice: {
+    label: "정의당",
+    logoSrc: "/justice-logo.webp",
+  },
+  laborparty: {
+    label: "노동당",
+    logoSrc: null,
+  },
+  minjoo: {
+    label: "민주당",
+    logoSrc: null,
+  },
+  neutral: {
+    label: "무정당",
+    logoSrc: null,
+  },
+  reform: {
+    label: "개혁신당",
+    logoSrc: null,
+  },
+};
+
+export function getPostColorStyle(post: PublicMoongPost): SocialSourceColorStyle {
+  return getPalette(
+    post.partyKey ||
+      getSocialSourceColorKey({
+        displayName: post.authorName,
+        sourceKey: post.sourceKey,
+        sourceUrl: post.sourceUrl,
+        username: post.authorUsername,
+      }),
+  );
 }
 
-export function getContextColorStyle(context: SocialPostContext | null) {
-  if (!context) {
-    return getSocialSourceColorStyle({});
-  }
+export function getPostPartyInfo(post: PublicMoongPost): SocialSourcePartyInfo {
+  return getPartyInfo(
+    post.partyKey ||
+      getSocialSourceColorKey({
+        displayName: post.authorName,
+        sourceKey: post.sourceKey,
+        sourceUrl: post.sourceUrl,
+        username: post.authorUsername,
+      }),
+  );
+}
 
-  return getSocialSourceColorStyle({
-    displayName: context.authorName ?? undefined,
-    sourceUrl: context.sourceUrl ?? undefined,
-    username: context.authorUsername ?? undefined,
-  });
+export function getSocialSourcePartyInfo({
+  displayName,
+  sourceKey,
+  sourceUrl,
+  username,
+}: {
+  displayName?: string | null;
+  sourceKey?: string | null;
+  sourceUrl?: string | null;
+  username?: string | null;
+}): SocialSourcePartyInfo {
+  return getPartyInfo(
+    getSocialSourceColorKey({ displayName, sourceKey, sourceUrl, username }),
+  );
+}
+
+export function getPartyInfo(key: string): SocialSourcePartyInfo {
+  const palette = getPalette(key);
+  const meta = PARTY_META[palette.key] ?? PARTY_META.neutral;
+
+  return {
+    accentColor: palette["--party-accent"],
+    key: palette.key,
+    label: meta.label,
+    logoSrc: meta.logoSrc,
+  };
+}
+
+export function getSocialSourceColorKey({
+  displayName,
+  sourceKey,
+  sourceUrl,
+  username,
+}: {
+  displayName?: string | null;
+  sourceKey?: string | null;
+  sourceUrl?: string | null;
+  username?: string | null;
+}) {
+  return (
+    getConfiguredColorKey(sourceKey, username, sourceUrl) ??
+    inferColorKey({ displayName, sourceKey, sourceUrl, username }) ??
+    "neutral"
+  );
 }
 
 export function getSocialSourceColorStyle({
@@ -221,12 +326,21 @@ export function getSocialSourceColorStyle({
   sourceUrl?: string | null;
   username?: string | null;
 }): SocialSourceColorStyle {
-  const paletteKey =
-    getConfiguredColorKey(sourceKey, username, sourceUrl) ??
-    inferColorKey({ displayName, sourceKey, sourceUrl, username }) ??
-    "neutral";
+  return getPalette(
+    getSocialSourceColorKey({ displayName, sourceKey, sourceUrl, username }),
+  );
+}
 
-  return getPalette(paletteKey);
+export function getContextColorStyle(context: SocialPostContext | null) {
+  if (!context) {
+    return getSocialSourceColorStyle({});
+  }
+
+  return getSocialSourceColorStyle({
+    displayName: context.authorName ?? undefined,
+    sourceUrl: context.sourceUrl ?? undefined,
+    username: context.authorUsername ?? undefined,
+  });
 }
 
 function getConfiguredColorKey(

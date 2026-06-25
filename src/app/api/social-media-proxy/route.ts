@@ -2,19 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "edge";
 
+const ALLOWED_IMAGE_HOSTS = new Set(["pbs.twimg.com"]);
 const ALLOWED_VIDEO_HOSTS = new Set(["video.twimg.com"]);
+const IMAGE_CONTENT_TYPE_FALLBACK = "image/jpeg";
 const VIDEO_CONTENT_TYPE_FALLBACK = "video/mp4";
 
 export async function GET(request: NextRequest) {
   const target = request.nextUrl.searchParams.get("url");
-  const targetUrl = parseAllowedVideoUrl(target);
+  const targetMedia = parseAllowedMediaUrl(target);
 
-  if (!targetUrl) {
-    return NextResponse.json({ error: "invalid_video_url" }, { status: 400 });
+  if (!targetMedia) {
+    return NextResponse.json({ error: "invalid_media_url" }, { status: 400 });
   }
 
   const upstreamHeaders = new Headers({
-    Accept: "video/*,*/*;q=0.8",
+    Accept:
+      targetMedia.type === "video" ? "video/*,*/*;q=0.8" : "image/*,*/*;q=0.8",
     Referer: "https://x.com/",
     "User-Agent":
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36",
@@ -25,7 +28,7 @@ export async function GET(request: NextRequest) {
     upstreamHeaders.set("Range", range);
   }
 
-  const upstream = await fetch(targetUrl, {
+  const upstream = await fetch(targetMedia.url, {
     cache: "no-store",
     headers: upstreamHeaders,
     redirect: "follow",
@@ -33,7 +36,7 @@ export async function GET(request: NextRequest) {
 
   if (!upstream.ok && upstream.status !== 206) {
     return NextResponse.json(
-      { error: "video_fetch_failed" },
+      { error: "media_fetch_failed" },
       { status: upstream.status },
     );
   }
@@ -48,7 +51,10 @@ export async function GET(request: NextRequest) {
   copyHeader(upstream.headers, responseHeaders, "last-modified");
   responseHeaders.set(
     "content-type",
-    upstream.headers.get("content-type") ?? VIDEO_CONTENT_TYPE_FALLBACK,
+    upstream.headers.get("content-type") ??
+      (targetMedia.type === "video"
+        ? VIDEO_CONTENT_TYPE_FALLBACK
+        : IMAGE_CONTENT_TYPE_FALLBACK),
   );
 
   if (!responseHeaders.has("cache-control")) {
@@ -61,7 +67,7 @@ export async function GET(request: NextRequest) {
   });
 }
 
-function parseAllowedVideoUrl(value: string | null) {
+function parseAllowedMediaUrl(value: string | null) {
   if (!value) {
     return null;
   }
@@ -70,15 +76,35 @@ function parseAllowedVideoUrl(value: string | null) {
     const url = new URL(value);
     const host = url.hostname.toLowerCase();
 
-    if (url.protocol !== "https:" || !ALLOWED_VIDEO_HOSTS.has(host)) {
+    if (url.protocol !== "https:") {
       return null;
     }
 
-    if (!/\.mp4$/i.test(url.pathname)) {
-      return null;
+    if (ALLOWED_VIDEO_HOSTS.has(host) && /\.mp4$/i.test(url.pathname)) {
+      return {
+        type: "video" as const,
+        url,
+      };
     }
 
-    return url;
+    if (ALLOWED_IMAGE_HOSTS.has(host) && url.pathname.startsWith("/media/")) {
+      return {
+        type: "image" as const,
+        url,
+      };
+    }
+
+    if (
+      ALLOWED_IMAGE_HOSTS.has(host) &&
+      url.pathname.startsWith("/amplify_video_thumb/")
+    ) {
+      return {
+        type: "image" as const,
+        url,
+      };
+    }
+
+    return null;
   } catch {
     return null;
   }
