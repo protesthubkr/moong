@@ -133,6 +133,8 @@ select {
   display: grid;
   gap: 10px;
   grid-template-columns: 108px minmax(0, 1fr);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
   scroll-margin-top: 64px;
 }
 
