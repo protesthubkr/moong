@@ -39,7 +39,15 @@ export type SocialPostAttachment = {
   previewImageUrl?: string | null;
   type: "photo" | "video" | "animated_gif" | "unknown";
   url?: string | null;
+  variants?: SocialPostMediaVariant[];
+  videoUrl?: string | null;
   width?: number | null;
+};
+
+export type SocialPostMediaVariant = {
+  bitRate?: number | null;
+  contentType?: string | null;
+  url: string;
 };
 
 export type SocialPostLink = {
@@ -146,6 +154,11 @@ export type XMedia = {
   preview_image_url?: string;
   type?: "photo" | "video" | "animated_gif";
   url?: string;
+  variants?: Array<{
+    bit_rate?: number;
+    content_type?: string;
+    url: string;
+  }>;
   width?: number;
 };
 

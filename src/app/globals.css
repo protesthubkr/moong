@@ -25,15 +25,21 @@
 
 html {
   background: var(--background);
+  overflow-x: clip;
+}
+
+html:has(.moong-feed) {
+  scroll-padding-top: 64px;
 }
 
 body {
-  min-height: 100vh;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.72), transparent 240px),
     var(--background);
   color: var(--foreground);
   font-family: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  min-height: 100vh;
+  overflow-x: clip;
 }
 
 a {
@@ -50,16 +56,25 @@ select {
 
 .moong-page {
   min-height: 100vh;
-  padding: 18px clamp(14px, 3vw, 36px) 48px;
+  padding: 0 clamp(14px, 3vw, 36px) 48px;
 }
 
 .moong-topbar {
   align-items: center;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(23, 23, 22, 0.08);
+  box-shadow: 0 0 0 100vmax #ffffff;
+  clip-path: inset(0 -100vmax);
   display: flex;
   justify-content: center;
-  margin: 0 auto;
-  max-width: 760px;
+  left: 50%;
+  margin: 0;
   min-height: 58px;
+  position: fixed;
+  top: 0;
+  transform: translateX(-50%);
+  width: min(calc(100vw - 28px), 760px);
+  z-index: 20;
 }
 
 .moong-brand {
@@ -82,7 +97,8 @@ select {
 .moong-feed-shell {
   margin: 0 auto;
   max-width: 760px;
-  padding-top: 10px;
+  padding-top: 68px;
+  touch-action: pan-y;
 }
 
 .moong-feed {
@@ -117,6 +133,7 @@ select {
   display: grid;
   gap: 10px;
   grid-template-columns: 108px minmax(0, 1fr);
+  scroll-margin-top: 64px;
 }
 
 .moong-author {
@@ -152,27 +169,30 @@ select {
 .moong-author-text {
   display: flex;
   flex-direction: column;
+  gap: 2px;
+  max-width: 62px;
   min-width: 0;
 }
 
-.moong-author-name,
-.moong-author-handle {
+.moong-author-name-primary,
+.moong-author-name-secondary {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.moong-author-name {
+.moong-author-name-primary {
   color: var(--ink-soft);
-  font-size: 13px;
-  font-weight: 720;
-  line-height: 1.25;
+  font-size: 10px;
+  font-weight: 660;
+  line-height: 1.05;
 }
 
-.moong-author-handle {
-  color: var(--muted);
+.moong-author-name-secondary {
+  color: var(--foreground);
   font-size: 12px;
-  line-height: 1.25;
+  font-weight: 740;
+  line-height: 1.12;
 }
 
 .moong-message {
@@ -188,9 +208,11 @@ select {
   border-radius: 7px 18px 18px 18px;
   box-shadow: 0 10px 28px rgba(24, 32, 28, 0.08);
   color: var(--foreground);
+  cursor: pointer;
   display: block;
   max-width: min(100%, 580px);
   padding: 14px 16px;
+  position: relative;
   transition:
     border-color 160ms ease,
     transform 160ms ease,
@@ -201,6 +223,29 @@ select {
   border-color: rgba(15, 139, 103, 0.4);
   box-shadow: 0 14px 34px rgba(24, 32, 28, 0.12);
   transform: translateY(-1px);
+}
+
+.moong-bubble--rich {
+  width: min(100%, 580px);
+}
+
+.moong-bubble-hit-area {
+  border-radius: inherit;
+  inset: 0;
+  position: absolute;
+  z-index: 1;
+}
+
+.moong-bubble-hit-area:focus-visible {
+  outline: 2px solid rgba(15, 139, 103, 0.72);
+  outline-offset: 3px;
+}
+
+.moong-bubble-body {
+  display: block;
+  pointer-events: none;
+  position: relative;
+  z-index: 0;
 }
 
 .moong-parent {
@@ -222,6 +267,7 @@ select {
 }
 
 .moong-parent-text {
+  --moong-text-max-height: 195px;
   display: block;
   font-size: 13px;
   line-height: 1.5;
@@ -230,12 +276,40 @@ select {
 }
 
 .moong-text {
+  --moong-text-max-height: 218.4px;
   display: block;
   font-size: 14px;
   font-weight: 500;
   line-height: 1.56;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
+}
+
+.moong-clamped-text {
+  max-height: var(--moong-text-max-height);
+  overflow: hidden;
+  position: relative;
+}
+
+.moong-clamped-text-ellipsis {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0), var(--surface) 32%);
+  bottom: 0;
+  display: none;
+  font-weight: inherit;
+  line-height: inherit;
+  padding-left: 24px;
+  position: absolute;
+  right: 0;
+}
+
+.moong-clamped-text--overflow .moong-clamped-text-ellipsis {
+  display: inline-block;
+}
+
+.moong-parent .moong-clamped-text-ellipsis {
+  background:
+    linear-gradient(90deg, rgba(223, 243, 233, 0), var(--accent-soft) 32%);
 }
 
 .moong-attachments {
@@ -247,38 +321,229 @@ select {
   width: 100%;
 }
 
-.moong-media-grid {
-  display: grid;
+.moong-media-carousel {
+  position: relative;
+  width: 100%;
+}
+
+.moong-media-strip {
+  display: flex;
   gap: 6px;
+  overflow-x: hidden;
+  overscroll-behavior-inline: none;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+  touch-action: pan-y;
 }
 
-.moong-media-grid--1 {
-  grid-template-columns: 1fr;
+.moong-media-strip::-webkit-scrollbar {
+  display: none;
 }
 
-.moong-media-grid--2,
-.moong-media-grid--3,
-.moong-media-grid--4 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.moong-media-strip--1,
+.moong-media-strip--2 {
+  overflow-x: hidden;
+}
+
+.moong-media-strip--1 .moong-media {
+  flex-basis: auto;
+  max-width: 100%;
+  width: fit-content;
+}
+
+.moong-media-strip--2 .moong-media {
+  flex-basis: calc((100% - 6px) / 2);
+}
+
+.moong-media-strip--3 .moong-media,
+.moong-media-strip--4 .moong-media {
+  flex-basis: calc((100% - 6px) / 2);
 }
 
 .moong-media {
+  align-items: center;
+  appearance: none;
   background: #d9ddd7;
   border: 1px solid rgba(23, 23, 22, 0.08);
   border-radius: 7px;
-  display: block;
-  min-height: 144px;
+  cursor: zoom-in;
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: center;
+  min-width: 0;
   overflow: hidden;
+  padding: 0;
   position: relative;
+  touch-action: pan-y;
+  z-index: 2;
+}
+
+.moong-media--video {
+  cursor: default;
+}
+
+.moong-media-strip--1 .moong-media--video {
+  flex-basis: min(100%, 580px);
+  max-width: 100%;
+  width: min(100%, 580px);
+}
+
+.moong-media-arrow {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(23, 23, 22, 0.12);
+  border-radius: 999px;
+  box-shadow: 0 8px 22px rgba(24, 32, 28, 0.14);
+  color: var(--foreground);
+  cursor: pointer;
+  display: inline-flex;
+  height: 34px;
+  justify-content: center;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  transition:
+    background 160ms ease,
+    opacity 160ms ease,
+    transform 160ms ease;
+  width: 34px;
+  z-index: 2;
+}
+
+.moong-media-arrow:hover {
+  background: #ffffff;
+}
+
+.moong-media-arrow:disabled {
+  cursor: default;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.moong-media-arrow--prev {
+  left: 8px;
+}
+
+.moong-media-arrow--next {
+  right: 8px;
+}
+
+.moong-media-arrow-icon {
+  border-color: currentColor;
+  border-style: solid;
+  border-width: 0 2px 2px 0;
+  display: block;
+  height: 9px;
+  width: 9px;
+}
+
+.moong-media-arrow--prev .moong-media-arrow-icon {
+  transform: rotate(135deg) translate(-1px, -1px);
+}
+
+.moong-media-arrow--next .moong-media-arrow-icon {
+  transform: rotate(-45deg) translate(-1px, -1px);
 }
 
 .moong-media img {
+  -webkit-user-drag: none;
   display: block;
-  height: 100%;
-  max-height: 420px;
-  min-height: 144px;
-  object-fit: cover;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
   width: 100%;
+}
+
+.moong-media-video {
+  background: #111111;
+  display: block;
+  height: auto;
+  max-height: 420px;
+  object-fit: contain;
+  touch-action: pan-y;
+  width: 100%;
+}
+
+.moong-media-strip--1 .moong-media img {
+  max-height: 420px;
+  max-width: 100%;
+  width: auto;
+}
+
+.moong-media-strip--1 .moong-media-video {
+  width: 100%;
+}
+
+.moong-youtube-embed {
+  aspect-ratio: 16 / 9;
+  background: #111111;
+  border: 0;
+  border-radius: 7px;
+  display: block;
+  position: relative;
+  width: 100%;
+  z-index: 2;
+}
+
+.moong-media-lightbox {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.86);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 14px;
+  position: fixed;
+  z-index: 120;
+}
+
+.moong-media-lightbox-frame {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  max-height: calc(100dvh - 28px);
+  max-width: calc(100vw - 28px);
+}
+
+.moong-media-lightbox-image {
+  border-radius: 8px;
+  box-shadow: 0 22px 80px rgba(0, 0, 0, 0.42);
+  display: block;
+  max-height: calc(100dvh - 28px);
+  max-width: calc(100vw - 28px);
+  object-fit: contain;
+}
+
+.moong-media-lightbox-close {
+  background: rgba(255, 255, 255, 0.92);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  height: 34px;
+  position: fixed;
+  right: 18px;
+  top: 18px;
+  width: 34px;
+  z-index: 121;
+}
+
+.moong-media-lightbox-close::before,
+.moong-media-lightbox-close::after {
+  background: var(--foreground);
+  content: "";
+  height: 2px;
+  left: 9px;
+  position: absolute;
+  top: 16px;
+  width: 16px;
+}
+
+.moong-media-lightbox-close::before {
+  transform: rotate(45deg);
+}
+
+.moong-media-lightbox-close::after {
+  transform: rotate(-45deg);
 }
 
 .moong-media-kind {
@@ -303,6 +568,8 @@ select {
   flex-direction: column;
   gap: 3px;
   padding: 11px 12px;
+  position: relative;
+  z-index: 2;
 }
 
 .moong-link-card:hover {
@@ -346,15 +613,50 @@ select {
   margin-left: 118px;
   max-width: min(calc(100% - 118px), 580px);
   padding: 11px 12px;
+  position: relative;
   transition:
     border-color 160ms ease,
     background 160ms ease;
   width: 100%;
+  z-index: 2;
 }
 
 .moong-original-card:hover {
   background: rgba(255, 255, 255, 0.78);
   border-color: rgba(15, 139, 103, 0.42);
+}
+
+.moong-original-card--embedded {
+  background: rgba(244, 246, 240, 0.86);
+  border: 0;
+  border-left: 3px solid rgba(15, 139, 103, 0.7);
+  box-shadow: none;
+  margin-left: 0;
+  margin-top: 12px;
+  max-width: 100%;
+  padding: 9px 10px;
+  transition: background 160ms ease;
+}
+
+.moong-original-card--embedded:hover {
+  background: rgba(238, 243, 235, 0.96);
+}
+
+.moong-original-card--embedded .moong-original-label {
+  display: none;
+}
+
+.moong-original-card--embedded .moong-original-author {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 760;
+}
+
+.moong-original-card--embedded .moong-original-text {
+  --moong-text-max-height: 177.6px;
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.48;
 }
 
 .moong-original-label {
@@ -373,11 +675,22 @@ select {
 }
 
 .moong-original-text {
+  --moong-text-max-height: 195px;
   display: block;
   font-size: 13px;
   line-height: 1.5;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
+}
+
+.moong-original-card .moong-clamped-text-ellipsis {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0), #ffffff 32%);
+}
+
+.moong-original-card--embedded .moong-clamped-text-ellipsis {
+  background:
+    linear-gradient(90deg, rgba(244, 246, 240, 0), #f4f6f0 32%);
 }
 
 .moong-original-text--empty {
@@ -664,15 +977,44 @@ select {
   }
 
   .moong-row {
-    grid-template-columns: 1fr;
+    gap: 8px;
+    grid-template-columns: 72px minmax(0, 1fr);
   }
 
   .moong-author {
-    padding-left: 2px;
+    align-items: center;
+    flex-direction: column;
+    gap: 3px;
+    padding-left: 0;
+    padding-top: 0;
   }
 
   .moong-message {
-    padding-left: 43px;
+    padding-left: 0;
+  }
+
+  .moong-author-text {
+    display: contents;
+  }
+
+  .moong-author-name-primary,
+  .moong-author-name-secondary {
+    max-width: 72px;
+    text-align: center;
+  }
+
+  .moong-author-name-primary {
+    font-size: 9px;
+    order: -1;
+  }
+
+  .moong-avatar {
+    order: 0;
+  }
+
+  .moong-author-name-secondary {
+    font-size: 11px;
+    order: 1;
   }
 
   .moong-bubble,
@@ -681,16 +1023,13 @@ select {
   }
 
   .moong-original-card {
-    margin-left: 43px;
-    max-width: calc(100% - 43px);
+    margin-left: 80px;
+    max-width: calc(100% - 80px);
   }
 
-  .moong-media {
-    min-height: 118px;
-  }
-
-  .moong-media img {
-    min-height: 118px;
+  .moong-original-card--embedded {
+    margin-left: 0;
+    max-width: 100%;
   }
 
   .ops-header {

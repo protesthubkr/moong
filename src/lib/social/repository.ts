@@ -492,6 +492,7 @@ export async function getPublicMoongFeed({
     return [];
   }
 
+  const feedWindowLimit = Math.max(limit * 2, limit);
   const { data, error } = await supabase
     .from("social_posts")
     .select(PUBLIC_POST_SELECT_WITH_SOURCE)
@@ -499,9 +500,9 @@ export async function getPublicMoongFeed({
     .eq("social_sources.is_following", true)
     .eq("social_sources.enabled", true)
     .eq("social_sources.is_protected", false)
-    .order("promoted_at", { ascending: true, nullsFirst: false })
-    .order("posted_at", { ascending: true, nullsFirst: false })
-    .limit(limit);
+    .order("posted_at", { ascending: false, nullsFirst: false })
+    .order("promoted_at", { ascending: false, nullsFirst: false })
+    .limit(feedWindowLimit);
 
   if (error) {
     throw new Error(error.message);
@@ -526,7 +527,9 @@ export async function getPublicMoongFeed({
     disabledSourceKeys: disabledSources.sourceKeys,
     promotedRows,
     quoteRows,
-  });
+  })
+    .sort(comparePublicFeedItemTime)
+    .slice(-limit);
 }
 
 async function getQuoteSiblingRows({
@@ -660,6 +663,39 @@ function comparePublicPostTime(a: PublicMoongPost, b: PublicMoongPost) {
   }
 
   return a.id.localeCompare(b.id);
+}
+
+function comparePublicFeedItemTime(a: PublicMoongFeedItem, b: PublicMoongFeedItem) {
+  const aTime = getPublicFeedItemTime(a);
+  const bTime = getPublicFeedItemTime(b);
+
+  if (aTime !== bTime) {
+    return aTime - bTime;
+  }
+
+  return a.id.localeCompare(b.id);
+}
+
+function getPublicFeedItemTime(item: PublicMoongFeedItem) {
+  if (item.kind === "post") {
+    return parseFeedTime(item.post.postedAt ?? item.promotedAt);
+  }
+
+  const postTimes = item.posts.map((post) => parseFeedTime(post.postedAt));
+  const latestPostTime = Math.max(...postTimes);
+
+  return Number.isFinite(latestPostTime)
+    ? latestPostTime
+    : parseFeedTime(item.promotedAt);
+}
+
+function parseFeedTime(value: string | null) {
+  if (!value) {
+    return Number.NEGATIVE_INFINITY;
+  }
+
+  const time = Date.parse(value);
+  return Number.isFinite(time) ? time : Number.NEGATIVE_INFINITY;
 }
 
 function isDisabledSourceContext(

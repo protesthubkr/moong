@@ -59,9 +59,51 @@ export function getPostAttachments(post: XPost) {
         previewImageUrl: media.preview_image_url ?? null,
         type: media.type ?? "unknown",
         url: media.url ?? null,
+        variants: getMediaVariants(media),
+        videoUrl: getPlayableVideoUrl(media),
         width: media.width ?? null,
       }),
     );
+}
+
+function getMediaVariants(media: XMedia): SocialPostAttachment["variants"] {
+  return (media.variants ?? [])
+    .filter((variant) => isHttpUrl(variant.url))
+    .map((variant) => ({
+      bitRate: variant.bit_rate ?? null,
+      contentType: variant.content_type ?? null,
+      url: variant.url,
+    }));
+}
+
+function getPlayableVideoUrl(media: XMedia) {
+  if (media.type !== "video" && media.type !== "animated_gif") {
+    return null;
+  }
+
+  return (
+    getMediaVariants(media)
+      ?.filter((variant) =>
+        isVideoVariant({
+          contentType: variant.contentType,
+          url: variant.url,
+        }),
+      )
+      .sort((a, b) => (b.bitRate ?? 0) - (a.bitRate ?? 0))[0]?.url ?? null
+  );
+}
+
+function isVideoVariant({
+  contentType,
+  url,
+}: {
+  contentType?: string | null;
+  url: string;
+}) {
+  return (
+    contentType?.toLowerCase().startsWith("video/") ||
+    /\.mp4(?:[?#]|$)/i.test(url)
+  );
 }
 
 export function getPostLinks(post: XPost): SocialPostLink[] {
